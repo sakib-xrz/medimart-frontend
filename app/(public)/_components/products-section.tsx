@@ -66,13 +66,13 @@ export function ProductsSection() {
             </p>
           </div>
         </div>
-        <div className="mx-auto mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mx-auto mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 lg:gap-6">
           {products.map((product, index) => (
-            <Card key={index} className="overflow-hidden">
+            <Card key={index} className="overflow-hidden rounded-lg shadow-sm">
               <CardHeader className="p-0">
                 <div className="relative px-4 pt-4">
                   <Badge
-                    className="absolute right-3 top-3 z-10"
+                    className="absolute right-3 top-3 z-10 hidden lg:block"
                     variant={"secondary"}
                   >
                     {product.category}
@@ -83,24 +83,24 @@ export function ProductsSection() {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="p-6">
-                <div className="mb-2 flex items-center justify-between">
-                  <h3 className="line-clamp-1 font-semibold">{product.name}</h3>
-                  <span className="font-bold text-primary">
-                    ${product.price}
-                  </span>
-                </div>
-                <p className="text-sm text-muted-foreground">
+              <CardContent className="p-3 lg:p-4">
+                <h3 className="mb-1 line-clamp-1 text-xs font-semibold sm:text-sm">
+                  {product.name}
+                </h3>
+                <h3 className="mb-1 hidden w-full truncate text-sm text-muted-foreground lg:block">
                   {product.description}
+                </h3>
+                <p className="line-clamp-2 text-lg font-medium text-primary">
+                  ${product.price}
                 </p>
               </CardContent>
-              <CardFooter className="p-6 pt-0">
+              <CardFooter className="p-3 pt-0 lg:p-4 lg:pt-0">
                 <div className="flex w-full gap-2">
                   <Button variant="outline" size="sm" className="w-full">
-                    <ShoppingCart className="mr-2 h-4 w-4" />
+                    <ShoppingCart className="mr-1 h-4 w-4 lg:mr-2" />
                     Add to Cart
                   </Button>
-                  <Link href={product.link} className="w-full">
+                  <Link href={product.link} className="hidden w-full xl:block">
                     <Button size="sm" className="w-full">
                       View Details
                     </Button>
