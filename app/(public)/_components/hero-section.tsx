@@ -7,10 +7,10 @@ import hero from "@/public/hero.png";
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-secondary/50 to-background">
+    <section className="relative overflow-hidden bg-gradient-to-b from-secondary/50 to-background py-8">
       <Container className="px-4 md:px-6">
         <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:gap-16">
-          <div className="flex flex-col justify-center space-y-4">
+          <div className="order-2 flex flex-col justify-center space-y-4 lg:order-1">
             <div className="space-y-2">
               <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl">
                 Your Health, Our <span className="text-primary">Priority</span>
@@ -28,22 +28,22 @@ export function HeroSection() {
                 View Categories
               </Button>
             </div>
-            <div className="grid grid-cols-1 gap-4 pt-4 sm:grid-cols-3">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-wrap justify-evenly gap-2 pt-4 lg:gap-4">
+              <div className="flex w-fit items-center gap-2">
                 <Truck className="h-5 w-5 text-primary" />
                 <span className="text-sm font-medium">Free Delivery</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex w-fit items-center gap-2">
                 <ShieldCheck className="h-5 w-5 text-primary" />
                 <span className="text-sm font-medium">Genuine Products</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex w-fit items-center gap-2">
                 <Clock className="h-5 w-5 text-primary" />
                 <span className="text-sm font-medium">24/7 Support</span>
               </div>
             </div>
           </div>
-          <div className="flex items-center justify-center lg:justify-end">
+          <div className="order-1 flex items-center justify-center lg:order-2 lg:justify-end">
             <div className="relative">
               <Image
                 src={hero}

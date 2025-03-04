@@ -21,7 +21,7 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <Container className="flex h-16 items-center justify-between">
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-1 md:gap-4">
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden">
@@ -29,14 +29,14 @@ export function Navbar() {
                 <span className="sr-only">Toggle menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-[240px] sm:w-[300px]">
+            <SheetContent side="left" className="w-full sm:w-[300px]">
               <div className="flex flex-col gap-6">
                 <Link
                   href="/"
-                  className="flex items-center gap-2"
+                  className="flex w-fit items-center gap-2"
                   onClick={() => setIsOpen(false)}
                 >
-                  <Image src={Logo} alt="Medi Mart Logo" />
+                  <Image src={Logo} alt="Medi Mart Logo" className="w-32" />
                 </Link>
                 <nav className="flex flex-col gap-4">
                   <SheetClose asChild>
@@ -83,8 +83,8 @@ export function Navbar() {
               </div>
             </SheetContent>
           </Sheet>
-          <Link href="/" className="flex items-center gap-2">
-            <Image src={Logo} alt="Medi Mart Logo" className="w-40" />
+          <Link href="/" className="flex items-center">
+            <Image src={Logo} alt="Medi Mart Logo" className="w-32 lg:w-40" />
           </Link>
         </div>
         <nav className="hidden items-center gap-6 md:flex">
