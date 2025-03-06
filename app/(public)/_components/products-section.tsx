@@ -1,52 +1,63 @@
 import Link from "next/link";
-import Image from "next/image";
-import { ArrowRight, ShoppingCart } from "lucide-react";
-
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import Container from "@/components/shared/container";
-import placeholder from "@/public/placeholder.jpg";
+import ProductCard from "./product-card";
 
 export function ProductsSection() {
   const products = [
     {
-      name: "Vitamin C Complex",
-      description: "Immune support supplement with added zinc and elderberry",
-      price: 19.99,
-      category: "Supplements",
-      badge: "Bestseller",
-      link: "#",
-    },
-    {
-      name: "Digital Thermometer",
-      description: "Fast reading digital thermometer with fever alert",
-      price: 12.99,
-      category: "Medical Devices",
-      badge: "New",
-      link: "#",
-    },
-    {
-      name: "Pain Relief Gel",
-      description: "Fast-acting topical gel for muscle and joint pain relief",
-      price: 15.99,
-      category: "Over-the-Counter",
-      badge: null,
-      link: "#",
-    },
-    {
-      name: "First Aid Kit",
+      id: "1",
+      name: "Ibuprofen",
       description:
-        "Comprehensive first aid kit for home and travel emergencies",
-      price: 29.99,
-      category: "Medical Supplies",
-      badge: "Essential",
-      link: "#",
+        "Non-steroidal anti-inflammatory drug (NSAID) used to relieve pain and reduce inflammation and fever.",
+      price: 8.99,
+      category: "Pain Relief",
+      dosage: "200mg",
+      form: "Tablets",
+      requiresPrescription: false,
+      link: "/medications/ibuprofen",
+      inStock: true,
+      maxQuantity: 3,
+    },
+    {
+      id: "2",
+      name: "Amoxicillin",
+      description:
+        "Antibiotic used to treat a number of bacterial infections. May cause side effects including diarrhea, rash, nausea, and vomiting.",
+      price: 15.99,
+      category: "Antibiotics",
+      dosage: "500mg",
+      form: "Capsules",
+      requiresPrescription: true,
+      link: "/medications/amoxicillin",
+      inStock: true,
+    },
+    {
+      id: "3",
+      name: "Cetirizine",
+      description:
+        "Antihistamine used to relieve allergy symptoms such as watery eyes, runny nose, itching eyes/nose, and sneezing.",
+      price: 12.49,
+      category: "Allergy",
+      dosage: "10mg",
+      form: "Tablets",
+      requiresPrescription: false,
+      link: "/medications/cetirizine",
+      inStock: false,
+    },
+    {
+      id: "4",
+      name: "Vitamin D3",
+      description:
+        "Dietary supplement to support bone health, immune function, and overall wellness when sun exposure is limited.",
+      price: 9.99,
+      category: "Supplements",
+      dosage: "1000 IU",
+      form: "Softgels",
+      requiresPrescription: false,
+      link: "/medications/vitamin-d3",
+      inStock: true,
     },
   ];
 
@@ -66,48 +77,9 @@ export function ProductsSection() {
             </p>
           </div>
         </div>
-        <div className="mx-auto mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 lg:gap-6">
-          {products.map((product, index) => (
-            <Card key={index} className="overflow-hidden rounded-lg shadow-sm">
-              <CardHeader className="p-0">
-                <div className="relative px-4 pt-4">
-                  <Badge
-                    className="absolute right-3 top-3 z-10 hidden lg:block"
-                    variant={"secondary"}
-                  >
-                    {product.category}
-                  </Badge>
-
-                  <div className="aspect-square rounded-lg">
-                    <Image src={placeholder} alt={product.name} fill />
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-3 lg:p-4">
-                <h3 className="mb-1 line-clamp-1 text-xs font-semibold sm:text-sm">
-                  {product.name}
-                </h3>
-                <h3 className="mb-1 hidden w-full truncate text-sm text-muted-foreground lg:block">
-                  {product.description}
-                </h3>
-                <p className="line-clamp-2 text-lg font-medium text-primary">
-                  ${product.price}
-                </p>
-              </CardContent>
-              <CardFooter className="p-3 pt-0 lg:p-4 lg:pt-0">
-                <div className="flex w-full gap-2">
-                  <Button variant="outline" size="sm" className="w-full">
-                    <ShoppingCart className="mr-1 h-4 w-4 lg:mr-2" />
-                    Add to Cart
-                  </Button>
-                  <Link href={product.link} className="hidden w-full xl:block">
-                    <Button size="sm" className="w-full">
-                      View Details
-                    </Button>
-                  </Link>
-                </div>
-              </CardFooter>
-            </Card>
+        <div className="mx-auto mt-12 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4 xl:grid-cols-4">
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
         <div className="mt-12 flex justify-center">
