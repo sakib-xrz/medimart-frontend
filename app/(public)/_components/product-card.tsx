@@ -67,7 +67,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         <h3 className="mb-1 line-clamp-1 text-sm font-semibold sm:text-base">
           {product.name}
         </h3>
-        <div className="mb-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+        <div className="mb-2 flex flex-wrap gap-x-2 gap-y-1 text-xs text-muted-foreground">
           <span>{product.form}</span>
           <span>•</span>
           <span>{product.dosage}</span>

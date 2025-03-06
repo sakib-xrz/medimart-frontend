@@ -7,7 +7,7 @@ import hero from "@/public/hero.png";
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-secondary/50 to-background py-8">
+    <section className="relative overflow-hidden bg-gradient-to-b from-secondary/50 to-background py-12 md:py-16 lg:py-20">
       <Container className="px-4 md:px-6">
         <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:gap-16">
           <div className="order-2 flex flex-col justify-center space-y-4 lg:order-1">

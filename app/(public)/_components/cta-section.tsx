@@ -6,7 +6,7 @@ import Container from "@/components/shared/container";
 
 export function CTASection() {
   return (
-    <section className="bg-primary text-primary-foreground" id="contact">
+    <section className="bg-primary py-12 text-primary-foreground" id="contact">
       <Container className="px-4 md:px-6">
         <div className="grid gap-6 lg:grid-cols-2 lg:gap-12">
           <div className="flex flex-col justify-center space-y-4">
