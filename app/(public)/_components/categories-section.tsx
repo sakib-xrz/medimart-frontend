@@ -1,52 +1,63 @@
-import Link from "next/link";
-import Image from "next/image";
-import { ArrowRight } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import Container from "@/components/shared/container";
-import placeholder from "@/public/placeholder.jpg";
+import CategoryCard from "./category-card";
 
 export function CategoriesSection() {
   const categories = [
     {
-      title: "Prescription Medicines",
+      id: "1",
+      title: "Supplements",
       description:
-        "Authorized medications prescribed by healthcare professionals",
-      link: "#",
+        "Vitamins and minerals to support overall health and wellness.",
+      link: "/categories/supplements",
+      icon: "NutIcon",
+      productCount: 24,
+      color: "#FFD166",
     },
     {
-      title: "Over-the-Counter",
+      id: "2",
+      title: "First Aid",
+      description: "Essential supplies for treating minor injuries and wounds.",
+      link: "/categories/first-aid",
+      icon: "Bandage",
+      productCount: 20,
+      color: "#4ECDC4",
+    },
+    {
+      id: "3",
+      title: "Women's Health",
+      description: "Specialized products for women's wellness needs.",
+      link: "/categories/womens-health",
+      icon: "Activity",
+      productCount: 19,
+      color: "#CB429F",
+    },
+    {
+      id: "4",
+      title: "Pain Relief",
       description:
-        "Medicines available without a prescription for common ailments",
-      link: "#",
+        "Medications to alleviate pain, reduce inflammation, and lower fever.",
+      link: "/categories/pain-relief",
+      icon: "Pill",
+      productCount: 18,
+      color: "#FF6B6B",
     },
     {
-      title: "Health Supplements",
-      description: "Vitamins, minerals, and supplements for overall wellbeing",
-      link: "#",
+      id: "5",
+      title: "Skin Care",
+      description: "Treatments for various skin conditions and daily care.",
+      link: "/categories/skin-care",
+      icon: "Sparkles",
+      productCount: 22,
+      color: "#7A86CB",
     },
     {
-      title: "Personal Care",
-      description: "Products for personal hygiene and skincare needs",
-      link: "#",
-    },
-    {
-      title: "Medical Devices",
-      description:
-        "Equipment and devices for monitoring and managing health conditions",
-      link: "#",
-    },
-    {
-      title: "Baby Care",
-      description: "Essential products for infant health and wellbeing",
-      link: "#",
+      id: "6",
+      title: "Digestive Health",
+      description: "Relief for digestive issues and gut health support.",
+      link: "/categories/digestive-health",
+      icon: "Leaf",
+      productCount: 16,
+      color: "#06D6A0",
     },
   ];
 
@@ -68,31 +79,8 @@ export function CategoriesSection() {
           </div>
         </div>
         <div className="mx-auto mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {categories.map((category, index) => (
-            <Card key={index} className="overflow-hidden">
-              <CardHeader className="p-0">
-                <div className="rounded-lg">
-                  <Image
-                    src={placeholder}
-                    alt={category.title}
-                    className="h-48 w-full object-cover"
-                  />
-                </div>
-              </CardHeader>
-              <CardContent className="p-6">
-                <CardTitle className="mb-2 text-xl">{category.title}</CardTitle>
-                <p className="line-clamp-1 text-sm text-muted-foreground">
-                  {category.description}
-                </p>
-              </CardContent>
-              <CardFooter className="p-6 pt-0">
-                <Link href={category.link} className="w-full">
-                  <Button variant="outline" className="w-full justify-between">
-                    View Products <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-              </CardFooter>
-            </Card>
+          {categories.map((category) => (
+            <CategoryCard key={category.id} category={category} />
           ))}
         </div>
       </Container>
