@@ -62,7 +62,7 @@ export function ProductsSection() {
   ];
 
   return (
-    <section className="bg-background py-12" id="products">
+    <section className="bg-background" id="products">
       <Container className="px-4 md:px-6">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
           <div className="space-y-2">

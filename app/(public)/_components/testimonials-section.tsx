@@ -38,7 +38,7 @@ export function TestimonialsSection() {
   ];
 
   return (
-    <section className="bg-background py-12">
+    <section className="bg-background">
       <Container className="px-4 md:px-6">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
           <div className="space-y-2">
