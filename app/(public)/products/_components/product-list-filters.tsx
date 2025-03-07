@@ -13,7 +13,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ProductListFiltersProps {
-  categories: string[];
+  categories?: string[];
   forms: string[];
   className?: string;
 }
@@ -27,12 +27,14 @@ export default function ProductListFilters({
     <ScrollArea className={className}>
       <Accordion
         type="multiple"
-        defaultValue={["category", "price", "availability"]}
+        defaultValue={
+          categories ? ["category", "availability"] : ["form", "availability"]
+        }
         className="pr-4"
       >
         {/* Category Filter */}
 
-        {categories.length > 0 && (
+        {categories && (
           <AccordionItem value="category">
             <AccordionTrigger className="text-base font-medium">
               Categories
