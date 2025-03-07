@@ -12,6 +12,7 @@ export function CategoriesSection() {
       icon: "NutIcon",
       productCount: 24,
       color: "#FFD166",
+      slug: "supplements",
     },
     {
       id: "2",
@@ -21,6 +22,7 @@ export function CategoriesSection() {
       icon: "Bandage",
       productCount: 20,
       color: "#4ECDC4",
+      slug: "first-aid",
     },
     {
       id: "3",
@@ -30,6 +32,7 @@ export function CategoriesSection() {
       icon: "Activity",
       productCount: 19,
       color: "#CB429F",
+      slug: "womens-health",
     },
     {
       id: "4",
@@ -40,6 +43,7 @@ export function CategoriesSection() {
       icon: "Pill",
       productCount: 18,
       color: "#FF6B6B",
+      slug: "pain-relief",
     },
     {
       id: "5",
@@ -49,6 +53,7 @@ export function CategoriesSection() {
       icon: "Sparkles",
       productCount: 22,
       color: "#7A86CB",
+      slug: "skin-care",
     },
     {
       id: "6",
@@ -58,6 +63,7 @@ export function CategoriesSection() {
       icon: "Leaf",
       productCount: 16,
       color: "#06D6A0",
+      slug: "digestive-health",
     },
   ];
 
