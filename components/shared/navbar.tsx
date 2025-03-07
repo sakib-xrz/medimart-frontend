@@ -41,7 +41,7 @@ export function Navbar() {
                 <nav className="flex flex-col gap-4">
                   <SheetClose asChild>
                     <Link
-                      href="#"
+                      href="/"
                       className="text-lg font-medium hover:text-primary"
                     >
                       Home
@@ -49,7 +49,7 @@ export function Navbar() {
                   </SheetClose>
                   <SheetClose asChild>
                     <Link
-                      href="#products"
+                      href="/products"
                       className="text-lg font-medium hover:text-primary"
                     >
                       Products
@@ -88,11 +88,11 @@ export function Navbar() {
           </Link>
         </div>
         <nav className="hidden items-center gap-6 md:flex">
-          <Link href="#" className="text-sm font-medium hover:text-primary">
+          <Link href="/" className="text-sm font-medium hover:text-primary">
             Home
           </Link>
           <Link
-            href="#products"
+            href="/products"
             className="text-sm font-medium hover:text-primary"
           >
             Products
