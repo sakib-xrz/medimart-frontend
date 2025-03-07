@@ -19,10 +19,9 @@ interface CategoryCardProps {
     id: string;
     title: string;
     description: string;
-    link: string;
     icon: string;
-    productCount: number;
     color: string;
+    slug: string;
   };
 }
 
@@ -43,7 +42,7 @@ export default function CategoryCard({ category }: CategoryCardProps) {
   const CategoryIcon = iconMap[category.title] || <Pill className="h-6 w-6" />;
 
   return (
-    <Link href={category.link} className="block h-full">
+    <Link href={`/products/${category.slug}`} className="block h-full">
       <Card
         className={cn(
           "group relative flex h-full flex-col overflow-hidden border-none p-0 shadow-md transition-all duration-300",
@@ -70,15 +69,6 @@ export default function CategoryCard({ category }: CategoryCardProps) {
             >
               {CategoryIcon}
             </div>
-            <span
-              className="rounded-full px-3 py-1 text-xs font-medium shadow-sm"
-              style={{
-                background: "white",
-                color: category.color,
-              }}
-            >
-              {category.productCount} products
-            </span>
           </div>
 
           <h3 className="mb-2 text-xl font-bold tracking-tight">
