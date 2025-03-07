@@ -15,26 +15,29 @@ import {
 
 interface ProductCardProps {
   product: {
-    id: string;
+    _id: string;
     name: string;
-    description: string;
+    slug: string;
     price: number;
     category: string;
+    category_slug: string;
     dosage: string;
-    form: string; // tablet, liquid, capsule, etc.
-    requiresPrescription: boolean;
-    link: string;
-    inStock: boolean;
-    maxQuantity?: number;
+    form: string;
+    description: string;
+    requires_prescription: boolean;
+    discount: number;
+    discount_type: string;
+    stock: number;
+    in_stock: boolean;
+    expiry_date: string;
   };
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
   const [quantity, setQuantity] = useState(1);
-  const maxQuantity = product.maxQuantity || 5; // Default max quantity for products
 
   const increaseQuantity = () => {
-    setQuantity((prev) => (prev < maxQuantity ? prev + 1 : prev));
+    setQuantity((prev) => (prev < product.stock ? prev + 1 : prev));
   };
 
   const decreaseQuantity = () => {
@@ -48,7 +51,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <Badge variant="secondary" className="mb-2">
             {product.category}
           </Badge>
-          {product.requiresPrescription && (
+          {product.requires_prescription && (
             <Badge
               variant="outline"
               className="mb-2 border-red-400 text-red-500"
@@ -56,14 +59,14 @@ export default function ProductCard({ product }: ProductCardProps) {
               Prescription Required
             </Badge>
           )}
-          {!product.inStock && (
+          {!product.in_stock && (
             <Badge variant="destructive" className="mb-2">
               Out of Stock
             </Badge>
           )}
         </div>
       </CardHeader>
-      <CardContent className="flex-1 p-4">
+      <CardContent className="flex-1 p-4 py-0">
         <h3 className="mb-1 line-clamp-1 text-sm font-semibold sm:text-base">
           {product.name}
         </h3>
@@ -85,7 +88,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               size="icon"
               className="h-8 w-8 rounded-r-none"
               onClick={decreaseQuantity}
-              disabled={!product.inStock || quantity <= 1}
+              disabled={!product.in_stock || quantity <= 1}
             >
               <Minus className="h-3 w-3" />
               <span className="sr-only">Decrease quantity</span>
@@ -98,12 +101,12 @@ export default function ProductCard({ product }: ProductCardProps) {
               size="icon"
               className="h-8 w-8 rounded-l-none"
               onClick={increaseQuantity}
-              disabled={!product.inStock || quantity >= maxQuantity}
+              disabled={!product.in_stock || quantity >= product.stock}
             >
               <Plus className="h-3 w-3" />
               <span className="sr-only">Increase quantity</span>
             </Button>
-            {quantity === maxQuantity && (
+            {quantity === product.stock && (
               <div className="ml-2 flex items-center text-xs text-amber-600">
                 <AlertCircle className="mr-1 h-3 w-3" />
                 Max quantity
@@ -115,12 +118,15 @@ export default function ProductCard({ product }: ProductCardProps) {
               variant="default"
               size="sm"
               className="w-full"
-              disabled={!product.inStock}
+              disabled={!product.in_stock}
             >
               <ShoppingCart className="mr-2 h-4 w-4" />
               Add to Cart
             </Button>
-            <Link href={product.link} className="w-full">
+            <Link
+              href={`/products/${product.category_slug}/${product.slug}`}
+              className="w-full"
+            >
               <Button variant="outline" size="sm" className="w-full">
                 Details
               </Button>
