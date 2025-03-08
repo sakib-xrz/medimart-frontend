@@ -58,11 +58,11 @@ export function ProductsSection() {
               ))}
         </div>
         <div className="mt-12 flex justify-center">
-          <Link href="#">
-            <Button variant="outline" className="gap-1">
+          <Button variant="outline" className="gap-1" asChild>
+            <Link href="/products">
               View All Products <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </Container>
     </section>

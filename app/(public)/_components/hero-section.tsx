@@ -4,6 +4,7 @@ import { ArrowRight, Clock, ShieldCheck, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Container from "@/components/shared/container";
 import hero from "@/public/hero.png";
+import Link from "next/link";
 
 export function HeroSection() {
   return (
@@ -21,14 +22,18 @@ export function HeroSection() {
               </p>
             </div>
             <div className="flex flex-col gap-2 min-[400px]:flex-row">
-              <Button size="lg" className="gap-1">
-                Shop Now <ArrowRight className="h-4 w-4" />
+              <Button size="lg" className="gap-1" asChild>
+                <Link href="/products">
+                  {" "}
+                  Shop Now <ArrowRight className="h-4 w-4" />{" "}
+                </Link>
               </Button>
+
               <Button size="lg" variant="outline">
-                View Categories
+                <Link href="/categories">View Categories</Link>
               </Button>
             </div>
-            <div className="flex flex-wrap justify-evenly gap-2 pt-4 lg:gap-4">
+            <div className="flex flex-wrap justify-evenly gap-2 pt-4 lg:justify-start lg:gap-4">
               <div className="flex w-fit items-center gap-2">
                 <Truck className="h-5 w-5 text-primary" />
                 <span className="text-sm font-medium">Free Delivery</span>

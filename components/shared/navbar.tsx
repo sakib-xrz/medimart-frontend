@@ -57,7 +57,7 @@ export function Navbar() {
                   </SheetClose>
                   <SheetClose asChild>
                     <Link
-                      href="#categories"
+                      href="/categories"
                       className="text-lg font-medium hover:text-primary"
                     >
                       Categories
@@ -98,7 +98,7 @@ export function Navbar() {
             Products
           </Link>
           <Link
-            href="#categories"
+            href="/categories"
             className="text-sm font-medium hover:text-primary"
           >
             Categories
