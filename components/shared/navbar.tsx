@@ -14,9 +14,12 @@ import {
 } from "@/components/ui/sheet";
 import Logo from "@/public/logo.svg";
 import Container from "./container";
+import { cn } from "@/lib/utils";
+import { usePathname } from "next/navigation";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -42,7 +45,10 @@ export function Navbar() {
                   <SheetClose asChild>
                     <Link
                       href="/"
-                      className="text-lg font-medium hover:text-primary"
+                      className={cn(
+                        "text-lg font-medium hover:text-primary",
+                        pathname === "/" && "text-primary",
+                      )}
                     >
                       Home
                     </Link>
@@ -50,7 +56,11 @@ export function Navbar() {
                   <SheetClose asChild>
                     <Link
                       href="/products"
-                      className="text-lg font-medium hover:text-primary"
+                      className={cn(
+                        "text-lg font-medium hover:text-primary",
+                        pathname === "/products" && "text-primary",
+                        pathname.includes("/product") && "text-primary",
+                      )}
                     >
                       Products
                     </Link>
@@ -58,7 +68,10 @@ export function Navbar() {
                   <SheetClose asChild>
                     <Link
                       href="/categories"
-                      className="text-lg font-medium hover:text-primary"
+                      className={cn(
+                        "text-lg font-medium hover:text-primary",
+                        pathname === "/categories" && "text-primary",
+                      )}
                     >
                       Categories
                     </Link>
@@ -66,7 +79,10 @@ export function Navbar() {
                   <SheetClose asChild>
                     <Link
                       href="#about"
-                      className="text-lg font-medium hover:text-primary"
+                      className={cn(
+                        "text-lg font-medium hover:text-primary",
+                        pathname === "/about" && "text-primary",
+                      )}
                     >
                       About
                     </Link>
@@ -74,7 +90,10 @@ export function Navbar() {
                   <SheetClose asChild>
                     <Link
                       href="#contact"
-                      className="text-lg font-medium hover:text-primary"
+                      className={cn(
+                        "text-lg font-medium hover:text-primary",
+                        pathname === "/contact" && "text-primary",
+                      )}
                     >
                       Contact
                     </Link>
@@ -88,30 +107,49 @@ export function Navbar() {
           </Link>
         </div>
         <nav className="hidden items-center gap-6 md:flex">
-          <Link href="/" className="text-sm font-medium hover:text-primary">
+          <Link
+            href="/"
+            className={cn(
+              "text-sm font-medium hover:text-primary",
+              pathname === "/" && "text-primary",
+            )}
+          >
             Home
           </Link>
           <Link
             href="/products"
-            className="text-sm font-medium hover:text-primary"
+            className={cn(
+              "text-sm font-medium hover:text-primary",
+              pathname === "/products" && "text-primary",
+              pathname.includes("/product") && "text-primary",
+            )}
           >
             Products
           </Link>
           <Link
             href="/categories"
-            className="text-sm font-medium hover:text-primary"
+            className={cn(
+              "text-sm font-medium hover:text-primary",
+              pathname === "/categories" && "text-primary",
+            )}
           >
             Categories
           </Link>
           <Link
             href="#about"
-            className="text-sm font-medium hover:text-primary"
+            className={cn(
+              "text-sm font-medium hover:text-primary",
+              pathname === "/about" && "text-primary",
+            )}
           >
             About
           </Link>
           <Link
             href="#contact"
-            className="text-sm font-medium hover:text-primary"
+            className={cn(
+              "text-sm font-medium hover:text-primary",
+              pathname === "/contact" && "text-primary",
+            )}
           >
             Contact
           </Link>
@@ -126,7 +164,7 @@ export function Navbar() {
               </span>
             </Button>
           </Link>
-          <Link href="/account">
+          <Link href="/profile">
             <Button variant="ghost" size="icon" className="hidden sm:flex">
               <User className="h-5 w-5" />
               <span className="sr-only">Account</span>

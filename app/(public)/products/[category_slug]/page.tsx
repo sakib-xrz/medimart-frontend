@@ -303,7 +303,9 @@ export default function Product() {
   return (
     <main className="flex-1 bg-muted/30">
       <Container>
-        <h1 className="mb-6 text-3xl font-bold tracking-tight">All Products</h1>
+        <h1 className="mb-6 text-3xl font-bold tracking-tight">
+          First Aid Products
+        </h1>
 
         {/* Product List Header with Search, Sort and mobile Filter*/}
         <ProductListHeader />
