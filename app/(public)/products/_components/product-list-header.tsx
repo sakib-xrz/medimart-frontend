@@ -14,32 +14,22 @@ import { Button } from "@/components/ui/button";
 import { Filter, X } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import ProductListFilters from "./product-list-filters";
+import { categoryNames, forms } from "@/lib/constant";
+import { TParams } from "../page";
 
-const categories = [
-  "Digestive Health",
-  "First Aid",
-  "Pain Relief",
-  "Skin Care",
-  "Supplements",
-  "Women's Health",
-];
+interface ProductListHeaderProps {
+  params: TParams;
+  setParams: (params: TParams) => void;
+  searchKey: string;
+  handleSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
 
-const forms = [
-  "Bandage",
-  "Capsule",
-  "Cream",
-  "Cup",
-  "Gel",
-  "Liquid",
-  "Pad",
-  "Roll",
-  "Strips",
-  "Tablet",
-  "Test Kit",
-  "Wipes",
-];
-
-export default function ProductListHeader() {
+export default function ProductListHeader({
+  params,
+  setParams,
+  searchKey,
+  handleSearchChange,
+}: ProductListHeaderProps) {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   return (
     <div className="flex flex-col gap-4 rounded-lg border bg-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
@@ -48,8 +38,8 @@ export default function ProductListHeader() {
         <Input
           placeholder="Search products..."
           className="pl-8"
-          //   value={searchQuery}
-          //   onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={handleSearchChange}
+          value={searchKey}
         />
       </div>
       <div className="flex items-center justify-between gap-4">
@@ -83,24 +73,57 @@ export default function ProductListHeader() {
                 </Button>
               </div>
               <ProductListFilters
-                categories={categories}
+                categories={categoryNames}
                 forms={forms}
+                params={params}
+                setParams={setParams}
                 className="h-full pb-20"
               />
             </SheetContent>
           </Sheet>
         </div>
         <div className="w-full xs:w-[180px]">
-          <Select>
+          <Select
+            onValueChange={(value) => {
+              if (value === "createdAt") {
+                setParams({
+                  ...params,
+                  sortBy: "createdAt",
+                  sortOrder: "desc",
+                });
+              } else if (value === "price") {
+                setParams({ ...params, sortBy: "price", sortOrder: "asc" });
+              } else if (value === "-price") {
+                setParams({ ...params, sortBy: "price", sortOrder: "desc" });
+              } else if (value === "name") {
+                setParams({ ...params, sortBy: "name", sortOrder: "asc" });
+              } else if (value === "-name") {
+                setParams({ ...params, sortBy: "name", sortOrder: "desc" });
+              }
+            }}
+            value={
+              params.sortBy === "createdAt" && params.sortOrder === "desc"
+                ? "createdAt"
+                : params.sortBy === "price" && params.sortOrder === "asc"
+                  ? "price"
+                  : params.sortBy === "-price" && params.sortOrder === "desc"
+                    ? "-price"
+                    : params.sortBy === "name" && params.sortOrder === "asc"
+                      ? "name"
+                      : params.sortBy === "-name" && params.sortOrder === "desc"
+                        ? "-name"
+                        : undefined
+            }
+          >
             <SelectTrigger>
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="featured">Default</SelectItem>
-              <SelectItem value="price-asc">Price: Low to High</SelectItem>
-              <SelectItem value="price-desc">Price: High to Low</SelectItem>
-              <SelectItem value="name-asc">Name: A to Z</SelectItem>
-              <SelectItem value="name-desc">Name: Z to A</SelectItem>
+              <SelectItem value="createdAt">Default</SelectItem>
+              <SelectItem value="price">Price: Low to High</SelectItem>
+              <SelectItem value="-price">Price: High to Low</SelectItem>
+              <SelectItem value="name">Name: A to Z</SelectItem>
+              <SelectItem value="-name">Name: Z to A</SelectItem>
             </SelectContent>
           </Select>
         </div>

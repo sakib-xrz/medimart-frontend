@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
+
 "use client";
 
 import { Checkbox } from "@/components/ui/checkbox";
@@ -11,18 +14,39 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { TParams } from "../page";
 
 interface ProductListFiltersProps {
   categories?: string[];
   forms: string[];
+  params: TParams;
+  setParams: (params: TParams) => void;
   className?: string;
 }
 
 export default function ProductListFilters({
   categories,
   forms,
+  params,
+  setParams,
   className = "",
 }: ProductListFiltersProps) {
+  const handleCategoryChange = (category: string) => {
+    const updatedCategories = params.category?.includes(category)
+      ? params.category?.filter((c) => c !== category)
+      : [...params.category, category];
+
+    setParams((prev: TParams) => ({ ...prev, category: updatedCategories }));
+  };
+
+  const handleFormChange = (form: string) => {
+    const updatedForms = params.form?.includes(form)
+      ? params.form?.filter((c) => c !== form)
+      : [...params.form, form];
+
+    setParams((prev: TParams) => ({ ...prev, form: updatedForms }));
+  };
+
   return (
     <ScrollArea className={className}>
       <Accordion
@@ -44,12 +68,12 @@ export default function ProductListFilters({
                 {categories.map((category) => (
                   <div key={category} className="flex items-center space-x-2">
                     <Checkbox
-                      id={`category-${category}`}
-                      // checked={selectedCategories.includes(category)}
-                      // onCheckedChange={() => handleCategoryChange(category)}
+                      id={category}
+                      checked={params?.category?.includes(category)}
+                      onCheckedChange={() => handleCategoryChange(category)}
                     />
                     <Label
-                      htmlFor={`category-${category}`}
+                      htmlFor={category}
                       className="cursor-pointer text-sm font-normal"
                     >
                       {category}
@@ -72,8 +96,8 @@ export default function ProductListFilters({
                 <div key={form} className="flex items-center space-x-2">
                   <Checkbox
                     id={`form-${form}`}
-                    // checked={selectedForms.includes(form)}
-                    // onCheckedChange={() => handleFormChange(form)}
+                    checked={params?.form?.includes(form)}
+                    onCheckedChange={() => handleFormChange(form)}
                   />
                   <Label
                     htmlFor={`form-${form}`}
@@ -96,17 +120,27 @@ export default function ProductListFilters({
             <div className="space-y-4">
               <div className="flex items-center space-x-2">
                 <Checkbox
-                  id="in-stock"
-                  //   checked={inStockOnly}
-                  //   onCheckedChange={(checked) =>
-                  //     setInStockOnly(checked === true)
-                  //   }
+                  id="in_stock"
+                  checked={params?.in_stock ? true : false}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setParams((prev: TParams) => ({
+                        ...prev,
+                        in_stock: true,
+                      }));
+                    } else {
+                      setParams((prev: TParams) => ({
+                        ...prev,
+                        in_stock: null,
+                      }));
+                    }
+                  }}
                 />
                 <Label
-                  htmlFor="in-stock"
+                  htmlFor="in_stock"
                   className="cursor-pointer text-sm font-normal"
                 >
-                  In Stock Only
+                  In Stock
                 </Label>
               </div>
 
@@ -115,9 +149,32 @@ export default function ProductListFilters({
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Prescription</Label>
                 <RadioGroup
-                  //   value={prescriptionFilter}
-                  //   onValueChange={setPrescriptionFilter}
                   className="flex flex-col space-y-1"
+                  value={
+                    params?.requires_prescription === null
+                      ? "all"
+                      : params?.requires_prescription === false
+                        ? "no-prescription"
+                        : "prescription"
+                  }
+                  onValueChange={(value) => {
+                    if (value === "all") {
+                      setParams((prev: TParams) => ({
+                        ...prev,
+                        requires_prescription: null,
+                      }));
+                    } else if (value === "no-prescription") {
+                      setParams((prev: TParams) => ({
+                        ...prev,
+                        requires_prescription: false,
+                      }));
+                    } else if (value === "prescription") {
+                      setParams((prev: TParams) => ({
+                        ...prev,
+                        requires_prescription: true,
+                      }));
+                    }
+                  }}
                 >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="all" id="all" />

@@ -7,6 +7,10 @@ import { X } from "lucide-react";
 import ProductListFilters from "./_components/product-list-filters";
 import ProductCard from "../_components/product-card";
 import { categoryNames, forms } from "@/lib/constant";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useDebouncedCallback } from "use-debounce";
+import { generateQueryString } from "@/lib/utils";
 
 // Mock product data
 const allProducts = [
@@ -285,14 +289,78 @@ const allProducts = [
   },
 ];
 
+export type TParams = {
+  search: string;
+  category: string[];
+  form: string[];
+  in_stock: string | null;
+  requires_prescription: string | null;
+  sortBy: string;
+  sortOrder: string;
+  page: number;
+  limit: number;
+};
+
 export default function Product() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [searchKey, setSearchKey] = useState(searchParams.get("search") || "");
+
+  const [params, setParams] = useState({
+    search: searchParams.get("search") || "",
+    category: searchParams.get("category")?.split(",") || [],
+    form: searchParams.get("form")?.split(",") || [],
+    in_stock: searchParams.get("in_stock") || null,
+    requires_prescription: searchParams.get("requires_prescription") || null,
+    sortBy: searchParams.get("sortBy") || "createdAt",
+    sortOrder: searchParams.get("sortOrder") || "desc",
+    page: Number(searchParams.get("page")) || 1,
+    limit: Number(searchParams.get("limit")) || 12,
+  });
+
+  const debouncedSearch = useDebouncedCallback((value) => {
+    setParams((prev) => ({ ...prev, search: value, page: 1 }));
+  }, 400);
+
+  const modifyParams = {
+    ...params,
+    category: params.category.length > 0 ? params.category.join(",") : null,
+    form: params.form.length > 0 ? params.form.join(",") : null,
+  };
+
+  const updateURL = () => {
+    const queryString = generateQueryString(modifyParams);
+    // @ts-expect-error - Fix this later
+    router.push(decodeURIComponent(`/products${queryString}`), undefined, {
+      shallow: true,
+    });
+  };
+
+  const debouncedUpdateURL = useDebouncedCallback(updateURL, 500);
+
+  useEffect(() => {
+    debouncedUpdateURL();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    setSearchKey(value);
+    debouncedSearch(value);
+  };
+
   return (
     <main className="flex-1 bg-muted/30">
       <Container>
         <h1 className="mb-6 text-3xl font-bold tracking-tight">All Products</h1>
 
         {/* Product List Header with Search, Sort and mobile Filter*/}
-        <ProductListHeader />
+        <ProductListHeader
+          setParams={setParams}
+          params={params}
+          searchKey={searchKey}
+          handleSearchChange={handleSearchChange}
+        />
 
         <div className="mt-4 text-sm text-muted-foreground">
           Showing {allProducts.length} products
@@ -314,12 +382,26 @@ export default function Product() {
                   //     setInStockOnly(false);
                   //     setPrescriptionFilter("all");
                   //   }}
+                  onClick={() => {
+                    setParams((prev: TParams) => ({
+                      ...prev,
+                      category: [],
+                      form: [],
+                      in_stock: null,
+                      requires_prescription: null,
+                    }));
+                  }}
                 >
                   <X className="h-4 w-4" />
                   Clear All
                 </Button>
               </div>
-              <ProductListFilters categories={categoryNames} forms={forms} />
+              <ProductListFilters
+                categories={categoryNames}
+                forms={forms}
+                params={params}
+                setParams={setParams}
+              />
             </div>
           </div>
 

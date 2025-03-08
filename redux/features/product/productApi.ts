@@ -17,8 +17,19 @@ export const productApi = baseApi.injectEndpoints({
       }),
       providesTags: [tagTypes.product],
     }),
+    getProducts: builder.query({
+      query: (params) => ({
+        url: `/products`,
+        method: "GET",
+        params,
+      }),
+      providesTags: [tagTypes.product],
+    }),
   }),
 });
 
-export const { useGetFeaturedProductsQuery, useGetProductDetailQuery } =
-  productApi;
+export const {
+  useGetFeaturedProductsQuery,
+  useGetProductDetailQuery,
+  useGetProductsQuery,
+} = productApi;

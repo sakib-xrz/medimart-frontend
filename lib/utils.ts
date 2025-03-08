@@ -29,3 +29,28 @@ export const formatExpiryDate = (dateString: string) => {
     day: "numeric",
   });
 };
+
+export function generateQueryString(
+  params: Record<string, string | number | boolean | null | undefined>,
+): string {
+  const isEmpty = Object.values(params).every(
+    (value) => value === "" || value === null || value === undefined,
+  );
+
+  if (isEmpty) {
+    return "";
+  }
+
+  const queryString = Object.entries(params)
+    .filter(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      ([_key, value]) => value !== "" && value !== null && value !== undefined,
+    )
+    .map(
+      ([key, value]) =>
+        `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`,
+    )
+    .join("&");
+
+  return `?${queryString}`;
+}
