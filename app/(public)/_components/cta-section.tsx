@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Container from "@/components/shared/container";
+import Link from "next/link";
 
 export function CTASection() {
   return (
@@ -21,15 +22,18 @@ export function CTASection() {
               </p>
             </div>
             <div className="flex flex-col gap-2 min-[400px]:flex-row">
-              <Button size="lg" variant="secondary" className="gap-1">
-                Get Started <ArrowRight className="h-4 w-4" />
+              <Button size="lg" variant="secondary" className="gap-1" asChild>
+                <Link href={"/register"}>
+                  Get Started <ArrowRight className="h-4 w-4" />
+                </Link>
               </Button>
               <Button
                 size="lg"
                 variant="outline"
-                className="border-primary-foreground bg-transparent text-primary-foreground hover:bg-primary-foreground/10"
+                className="border-primary-foreground bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-white"
+                asChild
               >
-                Learn More
+                <Link href="/about">Learn More</Link>
               </Button>
             </div>
           </div>
