@@ -25,30 +25,28 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { calculateDiscountedPrice, cn, formatExpiryDate } from "@/lib/utils";
 import Container from "@/components/shared/container";
+import { useGetProductDetailQuery } from "@/redux/features/product/productApi";
+import ProductDetailsSkeleton from "./_components/product-details-skeleton";
 
-// Mock product data - in a real app, this would come from an API or database
-const productData = {
-  _id: "67cb1d68714acf32241d5145",
-  name: "Yeast Infection Treatment",
-  slug: "med-1becc1",
-  price: 200,
-  category: "Women's Health",
-  category_slug: "womens-health",
-  dosage: "7-day treatment",
-  form: "Cream",
-  pack_size: "30g tube",
-  manufacturer: "FemRelief",
-  description: "Antifungal cream for yeast infections.",
-  requires_prescription: false,
-  discount: 10,
-  discount_type: "PERCENTAGE",
-  stock: 45,
-  in_stock: true,
-  expiry_date: "2025-09-25T00:00:00.000Z",
-};
-
-export default function ProductDetailsPage() {
+export default function ProductDetailsPage({
+  params,
+}: {
+  params: {
+    category_slug: string;
+    product_slug: string;
+  };
+}) {
   const [quantity, setQuantity] = useState(1);
+
+  const product_slug = params.product_slug;
+
+  const { data, isLoading } = useGetProductDetailQuery(product_slug);
+
+  const productData = data?.data || {};
+
+  if (isLoading) {
+    return <ProductDetailsSkeleton />;
+  }
 
   const increaseQuantity = () => {
     setQuantity((prev) => (prev < productData.stock ? prev + 1 : prev));
@@ -322,7 +320,7 @@ export default function ProductDetailsPage() {
                   <span className="text-sm text-muted-foreground">
                     Product ID
                   </span>
-                  <span className="font-medium">{productData._id}</span>
+                  <span className="font-medium">{productData.slug}</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between">
