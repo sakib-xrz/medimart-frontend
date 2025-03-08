@@ -13,25 +13,10 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { calculateDiscountedPrice, cn, formatExpiryDate } from "@/lib/utils";
+import { IProduct } from "./products-section";
 
 interface ProductCardProps {
-  product: {
-    _id: string;
-    name: string;
-    slug: string;
-    price: number;
-    category: string;
-    category_slug: string;
-    dosage: string;
-    form: string;
-    description: string;
-    requires_prescription: boolean;
-    discount: number;
-    discount_type: string;
-    stock: number;
-    in_stock: boolean;
-    expiry_date: string;
-  };
+  product: IProduct;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
