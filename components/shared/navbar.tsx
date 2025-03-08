@@ -78,7 +78,7 @@ export function Navbar() {
                   </SheetClose>
                   <SheetClose asChild>
                     <Link
-                      href="#about"
+                      href="/about"
                       className={cn(
                         "text-lg font-medium hover:text-primary",
                         pathname === "/about" && "text-primary",
@@ -89,7 +89,7 @@ export function Navbar() {
                   </SheetClose>
                   <SheetClose asChild>
                     <Link
-                      href="#contact"
+                      href="/contact"
                       className={cn(
                         "text-lg font-medium hover:text-primary",
                         pathname === "/contact" && "text-primary",
@@ -136,7 +136,7 @@ export function Navbar() {
             Categories
           </Link>
           <Link
-            href="#about"
+            href="/about"
             className={cn(
               "text-sm font-medium hover:text-primary",
               pathname === "/about" && "text-primary",
@@ -145,7 +145,7 @@ export function Navbar() {
             About
           </Link>
           <Link
-            href="#contact"
+            href="/contact"
             className={cn(
               "text-sm font-medium hover:text-primary",
               pathname === "/contact" && "text-primary",
