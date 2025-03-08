@@ -6,21 +6,7 @@ import { X } from "lucide-react";
 import ProductListHeader from "../_components/product-list-header";
 import ProductListFilters from "../_components/product-list-filters";
 import ProductCard from "../../_components/product-card";
-
-const forms = [
-  "Bandage",
-  "Capsule",
-  "Cream",
-  "Cup",
-  "Gel",
-  "Liquid",
-  "Pad",
-  "Roll",
-  "Strips",
-  "Tablet",
-  "Test Kit",
-  "Wipes",
-];
+import { categories, forms } from "@/lib/constant";
 
 // Mock product data
 const allProducts = [
@@ -299,12 +285,24 @@ const allProducts = [
   },
 ];
 
-export default function Product() {
+export default function Product({
+  params,
+}: {
+  params: {
+    category_slug: string;
+  };
+}) {
+  const categorySlug = params.category_slug;
+
+  const categoryName = categories.find(
+    (category) => category.slug === categorySlug,
+  )?.title;
+
   return (
     <main className="flex-1 bg-muted/30">
       <Container>
         <h1 className="mb-6 text-3xl font-bold tracking-tight">
-          First Aid Products
+          {categoryName} Products
         </h1>
 
         {/* Product List Header with Search, Sort and mobile Filter*/}

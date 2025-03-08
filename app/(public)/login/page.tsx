@@ -17,15 +17,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+// import { Alert, AlertDescription } from "@/components/ui/alert";
 import Container from "@/components/shared/container";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  // const [error, setError] = useState("");
+  // const [isLoading, setIsLoading] = useState(false);
 
   return (
     <main className="flex-1 bg-muted/30 py-12 md:py-16 lg:py-20">
@@ -38,11 +38,11 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {error && (
+            {/* {error && (
               <Alert variant="destructive" className="mb-4">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
-            )}
+            )} */}
             <form className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
@@ -92,8 +92,9 @@ export default function LoginPage() {
                   </Button>
                 </div>
               </div>
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Signing in..." : "Sign In"}
+              <Button type="submit" className="w-full">
+                {/* {isLoading ? "Signing in..." : "Sign In"} */}
+                Sign In
               </Button>
             </form>
           </CardContent>

@@ -6,30 +6,7 @@ import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import ProductListFilters from "./_components/product-list-filters";
 import ProductCard from "../_components/product-card";
-
-const categories = [
-  "Digestive Health",
-  "First Aid",
-  "Pain Relief",
-  "Skin Care",
-  "Supplements",
-  "Women's Health",
-];
-
-const forms = [
-  "Bandage",
-  "Capsule",
-  "Cream",
-  "Cup",
-  "Gel",
-  "Liquid",
-  "Pad",
-  "Roll",
-  "Strips",
-  "Tablet",
-  "Test Kit",
-  "Wipes",
-];
+import { categoryNames, forms } from "@/lib/constant";
 
 // Mock product data
 const allProducts = [
@@ -342,7 +319,7 @@ export default function Product() {
                   Clear All
                 </Button>
               </div>
-              <ProductListFilters categories={categories} forms={forms} />
+              <ProductListFilters categories={categoryNames} forms={forms} />
             </div>
           </div>
 

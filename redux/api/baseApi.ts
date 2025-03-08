@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { tagTypesList } from "../tagTypes";
-import { BASE_URL } from "../../lib/utils";
 import { RootState } from "../store";
+import { BASE_URL } from "@/lib/constant";
 
 const baseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,
