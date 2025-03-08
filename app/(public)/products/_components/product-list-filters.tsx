@@ -36,7 +36,11 @@ export default function ProductListFilters({
       ? params.category?.filter((c) => c !== category)
       : [...params.category, category];
 
-    setParams((prev: TParams) => ({ ...prev, category: updatedCategories }));
+    setParams((prev: TParams) => ({
+      ...prev,
+      category: updatedCategories,
+      page: 1,
+    }));
   };
 
   const handleFormChange = (form: string) => {
@@ -44,7 +48,7 @@ export default function ProductListFilters({
       ? params.form?.filter((c) => c !== form)
       : [...params.form, form];
 
-    setParams((prev: TParams) => ({ ...prev, form: updatedForms }));
+    setParams((prev: TParams) => ({ ...prev, form: updatedForms, page: 1 }));
   };
 
   return (
@@ -127,11 +131,13 @@ export default function ProductListFilters({
                       setParams((prev: TParams) => ({
                         ...prev,
                         in_stock: true,
+                        page: 1,
                       }));
                     } else {
                       setParams((prev: TParams) => ({
                         ...prev,
                         in_stock: null,
+                        page: 1,
                       }));
                     }
                   }}
@@ -162,16 +168,19 @@ export default function ProductListFilters({
                       setParams((prev: TParams) => ({
                         ...prev,
                         requires_prescription: null,
+                        page: 1,
                       }));
                     } else if (value === "no-prescription") {
                       setParams((prev: TParams) => ({
                         ...prev,
                         requires_prescription: false,
+                        page: 1,
                       }));
                     } else if (value === "prescription") {
                       setParams((prev: TParams) => ({
                         ...prev,
                         requires_prescription: true,
+                        page: 1,
                       }));
                     }
                   }}

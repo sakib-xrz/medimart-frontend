@@ -3,10 +3,10 @@
 import Container from "@/components/shared/container";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
-import ProductListHeader from "../_components/product-list-header";
-import ProductListFilters from "../_components/product-list-filters";
+// import ProductListHeader from "../_components/product-list-header";
+// import ProductListFilters from "../_components/product-list-filters";
 import ProductCard from "../../_components/product-card";
-import { categories, forms } from "@/lib/constant";
+import { categories } from "@/lib/constant";
 
 // Mock product data
 const allProducts = [
@@ -306,7 +306,7 @@ export default function Product({
         </h1>
 
         {/* Product List Header with Search, Sort and mobile Filter*/}
-        <ProductListHeader />
+        {/* <ProductListHeader /> */}
 
         <div className="mt-4 text-sm text-muted-foreground">
           Showing {allProducts.length} products
@@ -333,7 +333,7 @@ export default function Product({
                   Clear All
                 </Button>
               </div>
-              <ProductListFilters forms={forms} />
+              {/* <ProductListFilters forms={forms} /> */}
             </div>
           </div>
 

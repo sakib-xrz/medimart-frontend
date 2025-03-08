@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
+
 "use client";
 
 import { Input } from "@/components/ui/input";
@@ -60,13 +63,19 @@ export default function ProductListHeader({
                 <Button
                   variant="secondary"
                   size="sm"
-                  // onClick={() => {
-                  //   setSelectedCategories([]);
-                  //   setSelectedForms([]);
-                  //   setPriceRange([0, 1500]);
-                  //   setInStockOnly(false);
-                  //   setPrescriptionFilter("all");
-                  // }}
+                  onClick={() => {
+                    setSearchKey("");
+                    setParams(() => ({
+                      search: "",
+                      category: [],
+                      form: [],
+                      in_stock: null,
+                      requires_prescription: null,
+                      sort: "createdAt",
+                      page: 1,
+                      limit: 12,
+                    }));
+                  }}
                 >
                   <X className="h-4 w-4" />
                   Clear All
@@ -85,35 +94,12 @@ export default function ProductListHeader({
         <div className="w-full xs:w-[180px]">
           <Select
             onValueChange={(value) => {
-              if (value === "createdAt") {
-                setParams({
-                  ...params,
-                  sortBy: "createdAt",
-                  sortOrder: "desc",
-                });
-              } else if (value === "price") {
-                setParams({ ...params, sortBy: "price", sortOrder: "asc" });
-              } else if (value === "-price") {
-                setParams({ ...params, sortBy: "price", sortOrder: "desc" });
-              } else if (value === "name") {
-                setParams({ ...params, sortBy: "name", sortOrder: "asc" });
-              } else if (value === "-name") {
-                setParams({ ...params, sortBy: "name", sortOrder: "desc" });
-              }
+              setParams((prev: TParams) => ({
+                ...prev,
+                sort: value,
+              }));
             }}
-            value={
-              params.sortBy === "createdAt" && params.sortOrder === "desc"
-                ? "createdAt"
-                : params.sortBy === "price" && params.sortOrder === "asc"
-                  ? "price"
-                  : params.sortBy === "-price" && params.sortOrder === "desc"
-                    ? "-price"
-                    : params.sortBy === "name" && params.sortOrder === "asc"
-                      ? "name"
-                      : params.sortBy === "-name" && params.sortOrder === "desc"
-                        ? "-name"
-                        : undefined
-            }
+            value={params.sort}
           >
             <SelectTrigger>
               <SelectValue placeholder="Sort by" />

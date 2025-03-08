@@ -54,3 +54,21 @@ export function generateQueryString(
 
   return `?${queryString}`;
 }
+
+export function sanitizeParams<T extends Record<string, unknown>>(
+  params: T,
+): Partial<T> {
+  const sanitizedObj: Partial<T> = {};
+
+  for (const key in params) {
+    if (
+      params[key] !== "" &&
+      params[key] !== null &&
+      params[key] !== undefined
+    ) {
+      sanitizedObj[key] = params[key];
+    }
+  }
+
+  return sanitizedObj;
+}
