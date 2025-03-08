@@ -10,7 +10,7 @@ export default function AboutPage() {
   return (
     <main className="flex-1">
       {/* Hero Section */}
-      <section className="bg-primary/10 py-12">
+      <section className="bg-primary/10 py-12 md:py-16 lg:py-20">
         <Container>
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
