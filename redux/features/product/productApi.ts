@@ -25,6 +25,14 @@ export const productApi = baseApi.injectEndpoints({
       }),
       providesTags: [tagTypes.product],
     }),
+    getProductByCategory: builder.query({
+      query: ({ category, params }) => ({
+        url: `/products/category/${category}`,
+        method: "GET",
+        params,
+      }),
+      providesTags: [tagTypes.product],
+    }),
   }),
 });
 
@@ -32,4 +40,5 @@ export const {
   useGetFeaturedProductsQuery,
   useGetProductDetailQuery,
   useGetProductsQuery,
+  useGetProductByCategoryQuery,
 } = productApi;
