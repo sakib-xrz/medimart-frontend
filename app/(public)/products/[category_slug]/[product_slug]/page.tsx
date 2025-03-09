@@ -84,7 +84,7 @@ export default function ProductDetailsPage({
     <main className="flex-1 bg-muted/30">
       <Container>
         {/* Breadcrumb */}
-        <nav className="mb-6 flex items-center text-sm text-muted-foreground">
+        <nav className="mb-6 flex flex-wrap items-center whitespace-nowrap text-sm text-muted-foreground">
           <Link href="/" className="hover:text-primary">
             Home
           </Link>
