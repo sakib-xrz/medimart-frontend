@@ -13,15 +13,8 @@ import { useDebouncedCallback } from "use-debounce";
 import { generateQueryString, sanitizeParams } from "@/lib/utils";
 import { useGetProductsQuery } from "@/redux/features/product/productApi";
 import ProductCardSkeleton from "../_components/product-card-skeleton";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import { IProduct } from "../_components/products-section";
+import CustomPagination from "../_components/custom-pagination";
 
 export type TParams = {
   search: string;
@@ -108,7 +101,7 @@ export default function Product() {
         />
 
         <div className="mt-4 text-sm text-muted-foreground">
-          Showing {products.length} products
+          Showing {products.length} of {meta.total} products
         </div>
 
         <div className="mt-6 lg:grid lg:grid-cols-4 lg:gap-8">
@@ -163,70 +156,11 @@ export default function Product() {
                   ))}
                 </div>
 
-                <div className="mt-8 flex justify-center">
-                  <Pagination>
-                    <PaginationContent>
-                      {/* Previous Button */}
-                      <PaginationItem>
-                        <PaginationPrevious
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handlePageChange(params.page - 1);
-                          }}
-                          className={
-                            params.page === 1
-                              ? "pointer-events-none opacity-50"
-                              : ""
-                          }
-                        />
-                      </PaginationItem>
-
-                      {/* Page Numbers */}
-                      {Array.from({ length: 5 }, (_, index) => {
-                        const pageNumber = params.page - 2 + index;
-
-                        if (pageNumber > 0 && pageNumber <= totalPages) {
-                          return (
-                            <PaginationItem key={pageNumber}>
-                              <PaginationLink
-                                href="#"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  handlePageChange(pageNumber);
-                                }}
-                                className={
-                                  params.page === pageNumber
-                                    ? "bg-primary text-white"
-                                    : ""
-                                }
-                              >
-                                {pageNumber}
-                              </PaginationLink>
-                            </PaginationItem>
-                          );
-                        }
-                        return null;
-                      })}
-
-                      {/* Next Button */}
-                      <PaginationItem>
-                        <PaginationNext
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handlePageChange(params.page + 1);
-                          }}
-                          className={
-                            params.page === totalPages
-                              ? "pointer-events-none opacity-50"
-                              : ""
-                          }
-                        />
-                      </PaginationItem>
-                    </PaginationContent>
-                  </Pagination>
-                </div>
+                <CustomPagination
+                  params={params}
+                  totalPages={totalPages}
+                  handlePageChange={handlePageChange}
+                />
               </>
             ) : (
               <div className="flex h-60 flex-col items-center justify-center rounded-lg border bg-card p-8 text-center">
@@ -257,17 +191,6 @@ export default function Product() {
                 </Button>
               </div>
             )}
-
-            {/* Pagination */}
-            {/* {filteredProducts.length > 0 && (
-              <div className="mt-8">
-                <ProductListPagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={setCurrentPage}
-                />
-              </div>
-            )} */}
           </div>
         </div>
       </Container>
