@@ -8,10 +8,11 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { TParams } from "../products/page";
 
 interface CustomPaginationProps {
-  params: TParams;
+  params: {
+    page: number;
+  };
   totalPages: number;
   handlePageChange: (page: number) => void;
 }

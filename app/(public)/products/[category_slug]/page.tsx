@@ -3,8 +3,6 @@
 import Container from "@/components/shared/container";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
-import ProductListHeader from "../_components/product-list-header";
-import ProductListFilters from "../_components/product-list-filters";
 import ProductCard from "../../_components/product-card";
 import { categories, forms } from "@/lib/constant";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -15,10 +13,11 @@ import { useGetProductByCategoryQuery } from "@/redux/features/product/productAp
 import ProductCardSkeleton from "../../_components/product-card-skeleton";
 import { IProduct } from "../../_components/products-section";
 import CustomPagination from "../../_components/custom-pagination";
+import ProductListHeader from "./_components/product-list-header";
+import ProductListFilters from "./_components/product-list-filters";
 
 export type TParams = {
   search: string;
-  category: string[];
   form: string[];
   in_stock: string | null;
   requires_prescription: string | null;
@@ -46,7 +45,6 @@ export default function Product({
 
   const [params, setParams] = useState({
     search: searchParams.get("search") || "",
-    category: searchParams.get("category")?.split(",") || [],
     form: searchParams.get("form")?.split(",") || [],
     in_stock: searchParams.get("in_stock") || null,
     requires_prescription: searchParams.get("requires_prescription") || null,
@@ -61,7 +59,6 @@ export default function Product({
 
   const modifyParams = {
     ...params,
-    category: params.category.length > 0 ? params.category.join(",") : null,
     form: params.form.length > 0 ? params.form.join(",") : null,
   };
 
