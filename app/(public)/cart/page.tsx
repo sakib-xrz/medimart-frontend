@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   AlertCircle,
@@ -23,113 +23,72 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { calculateDiscountedPrice } from "@/lib/utils";
 import Container from "@/components/shared/container";
-import { useCartProducts } from "@/redux/features/cart/cartSlice";
-
-// Mock cart data - in a real app, this would come from a state management solution
-const initialCartItems = [
-  {
-    id: "67cb1d68714acf32241d5140",
-    name: "Medical Tape",
-    slug: "med-b74fc3",
-    price: 90,
-    category: "First Aid",
-    category_slug: "first-aid",
-    dosage: "N/A",
-    form: "Roll",
-    description: "Hypoallergenic adhesive medical tape.",
-    requires_prescription: false,
-    discount: 5,
-    discount_type: "PERCENTAGE",
-    quantity: 2,
-    in_stock: true,
-    expiry_date: "2027-05-18T00:00:00.000Z",
-  },
-  {
-    id: "67cb1d68714acf32241d513e",
-    name: "Hydrogen Peroxide Solution 3%",
-    slug: "med-a1b583",
-    price: 120,
-    category: "First Aid",
-    category_slug: "first-aid",
-    dosage: "3%",
-    form: "Liquid",
-    description: "Disinfects cuts, wounds, and minor burns.",
-    requires_prescription: false,
-    discount: 10,
-    discount_type: "PERCENTAGE",
-    quantity: 1,
-    in_stock: true,
-    expiry_date: "2026-06-20T00:00:00.000Z",
-  },
-  {
-    id: "67cb1d68714acf32241d5149",
-    name: "Amoxicillin 500mg",
-    slug: "med-k57l89",
-    price: 180,
-    category: "Antibiotics",
-    category_slug: "antibiotics",
-    dosage: "500mg",
-    form: "Capsule",
-    description: "Broad-spectrum antibiotic for bacterial infections.",
-    requires_prescription: true,
-    discount: 0,
-    discount_type: "PERCENTAGE",
-    quantity: 1,
-    in_stock: true,
-    expiry_date: "2025-07-10T00:00:00.000Z",
-  },
-];
+import {
+  clearCart,
+  decrementQuantity,
+  incrementQuantity,
+  removeFromCart,
+  useCartProducts,
+} from "@/redux/features/cart/cartSlice";
+import { useGetCartItemsMutation } from "@/redux/features/cart/cartApi";
+import { useDispatch } from "react-redux";
+interface ICartItem {
+  _id: string;
+  name: string;
+  slug: string;
+  price: number;
+  category: string;
+  dosage: string;
+  form: string;
+  description: string;
+  requires_prescription: boolean;
+  discount: number;
+  discount_type: "PERCENTAGE" | "FLAT";
+  in_stock: boolean;
+  expiry_date: string;
+  quantity: number;
+}
 
 export default function CartPage() {
-  const [cartItems, setCartItems] = useState(initialCartItems);
+  const dispatch = useDispatch();
+  const cartItems = useCartProducts();
+  const [getCart] = useGetCartItemsMutation();
+  const [localCart, setLocalCart] = useState([]);
+  const [localSubtotal, setLocalSubtotal] = useState(0);
+  const [shippingFee, setShippingFee] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [requiresPrescription, setRequiresPrescription] = useState(false);
 
-  const cartItemsPayload = useCartProducts();
+  useEffect(() => {
+    getCart({ cart_items: cartItems }).then(({ data }) => {
+      setLocalCart(data?.data?.products || []);
+      setLocalSubtotal(data?.data?.subtotal || 0);
+      setShippingFee(data?.data?.shipping_charge || 0);
+      setTotal(data?.data?.grand_total || 0);
+      setRequiresPrescription(data?.data?.prescription_required || false);
+    });
 
-  console.log(cartItemsPayload);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cartItems]);
 
-  // Check if any item requires a prescription
-  const requiresPrescription = cartItems.some(
-    (item) => item.requires_prescription,
-  );
-
-  // Calculate cart totals
-  const calculateSubtotal = () => {
-    return cartItems.reduce((total, item) => {
-      const itemPrice = calculateDiscountedPrice({
-        price: item.price,
-        discount: item.discount,
-        discount_type: item.discount_type,
-      });
-      return total + itemPrice * item.quantity;
-    }, 0);
-  };
-
-  const subtotal = calculateSubtotal();
-  const shippingFee = subtotal > 1000 ? 0 : 50;
-  const total = subtotal + shippingFee;
-
-  // Update item quantity
-  const updateQuantity = (id: string, newQuantity: number) => {
-    if (newQuantity < 1) return;
-
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === id ? { ...item, quantity: newQuantity } : item,
-      ),
-    );
-  };
-
-  // Remove item from cart
-  const removeItem = (id: string) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.id !== id));
-  };
+  const subtotal = localSubtotal;
 
   return (
     <main className="flex-1 bg-muted/30">
       <Container>
-        <h1 className="mb-6 text-3xl font-bold tracking-tight">Your Cart</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="mb-6 text-3xl font-bold tracking-tight">Your Cart</h1>
+          {localCart.length > 0 && (
+            <p
+              className="cursor-pointer text-muted-foreground hover:text-destructive hover:underline"
+              onClick={() => dispatch(clearCart())}
+            >
+              Clear Cart
+            </p>
+          )}
+        </div>
 
-        {cartItems.length === 0 ? (
+        {localCart.length === 0 ? (
           <div className="rounded-lg border bg-card p-8 text-center">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
               <ShoppingCart className="h-6 w-6 text-primary" />
@@ -148,7 +107,7 @@ export default function CartPage() {
             <div className="lg:col-span-2">
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle>Cart Items ({cartItems.length})</CardTitle>
+                  <CardTitle>Cart Items ({localCart.length})</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {requiresPrescription && (
@@ -165,7 +124,7 @@ export default function CartPage() {
                   )}
 
                   <div className="space-y-4">
-                    {cartItems.map((item) => {
+                    {localCart?.map((item: ICartItem) => {
                       const itemPrice = calculateDiscountedPrice({
                         price: item.price,
                         discount: item.discount,
@@ -175,7 +134,7 @@ export default function CartPage() {
                         item.discount > 0 && itemPrice < item.price;
 
                       return (
-                        <div key={item.id} className="rounded-lg border p-4">
+                        <div key={item._id} className="rounded-lg border p-4">
                           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                             <div className="flex-1 space-y-1">
                               <div className="flex flex-wrap-reverse items-center gap-2">
@@ -215,7 +174,11 @@ export default function CartPage() {
                                   size="icon"
                                   className="h-8 w-8 rounded-r-none"
                                   onClick={() =>
-                                    updateQuantity(item.id, item.quantity - 1)
+                                    dispatch(
+                                      decrementQuantity({
+                                        id: item._id,
+                                      }),
+                                    )
                                   }
                                   disabled={item.quantity <= 1}
                                 >
@@ -232,7 +195,11 @@ export default function CartPage() {
                                   size="icon"
                                   className="h-8 w-8 rounded-l-none"
                                   onClick={() =>
-                                    updateQuantity(item.id, item.quantity + 1)
+                                    dispatch(
+                                      incrementQuantity({
+                                        id: item._id,
+                                      }),
+                                    )
                                   }
                                 >
                                   <Plus className="h-3 w-3" />
@@ -245,7 +212,13 @@ export default function CartPage() {
                                 variant="ghost"
                                 size="icon"
                                 className="h-8 w-8 text-muted-foreground hover:bg-destructive-foreground hover:text-destructive"
-                                onClick={() => removeItem(item.id)}
+                                onClick={() =>
+                                  dispatch(
+                                    removeFromCart({
+                                      id: item._id,
+                                    }),
+                                  )
+                                }
                               >
                                 <Trash2 className="h-4 w-4 text-destructive" />
                                 <span className="sr-only">Remove item</span>

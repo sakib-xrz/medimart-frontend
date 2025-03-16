@@ -31,6 +31,7 @@ const cartSlice = createSlice({
     removeFromCart: (state, action: PayloadAction<{ id: string }>) => {
       const { id } = action.payload;
       state.products = state.products.filter((product) => product.id !== id);
+      toast.success("Product removed from cart");
     },
     incrementQuantity: (state, action: PayloadAction<{ id: string }>) => {
       const { id } = action.payload;
