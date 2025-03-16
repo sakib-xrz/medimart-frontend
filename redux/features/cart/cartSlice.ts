@@ -25,7 +25,7 @@ const cartSlice = createSlice({
       const exists = state.products.some((item) => item.id === product.id);
       if (!exists) {
         state.products.push(product);
-        toast.success("Added to cart");
+        toast.success("Product added to cart");
       }
     },
     removeFromCart: (state, action: PayloadAction<{ id: string }>) => {
@@ -68,9 +68,9 @@ export const useCartProducts = (): Product[] => {
   return useSelector((state: RootState) => state.cart.products);
 };
 
-export const useIsInCart = (id: string): boolean => {
+export const useCartProduct = (id: string): Product | undefined => {
   return useSelector((state: RootState) =>
-    state.cart.products.some((product) => product.id === id),
+    state.cart.products.find((product) => product.id === id),
   );
 };
 

@@ -16,10 +16,15 @@ import Logo from "@/public/logo.svg";
 import Container from "./container";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
+import { useCartCount } from "@/redux/features/cart/cartSlice";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+
+  const cartCount = useCartCount();
+
+  console.log(cartCount);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -159,9 +164,11 @@ export function Navbar() {
             <Button variant="ghost" size="icon" className="relative">
               <ShoppingCart className="h-5 w-5" />
               <span className="sr-only">Shopping Cart</span>
-              <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
-                0
-              </span>
+              {cartCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
+                  {cartCount}
+                </span>
+              )}
             </Button>
           </Link>
           <Link href="/profile">

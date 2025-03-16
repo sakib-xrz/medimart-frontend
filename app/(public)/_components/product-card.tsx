@@ -14,13 +14,20 @@ import {
 } from "@/components/ui/card";
 import { calculateDiscountedPrice, cn, formatExpiryDate } from "@/lib/utils";
 import { IProduct } from "./products-section";
+import { useDispatch } from "react-redux";
+import { addToCart, useCartProduct } from "@/redux/features/cart/cartSlice";
 
 interface ProductCardProps {
   product: IProduct;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const [quantity, setQuantity] = useState(1);
+  const dispatch = useDispatch();
+
+  const cartProduct = useCartProduct(product._id);
+  const isProductExistInCart = cartProduct !== undefined;
+
+  const [quantity, setQuantity] = useState(cartProduct?.quantity || 1);
 
   const increaseQuantity = () => {
     setQuantity((prev) => (prev < product.stock ? prev + 1 : prev));
@@ -51,6 +58,10 @@ export default function ProductCard({ product }: ProductCardProps) {
   // Check if product is available for purchase
   const isAvailableForPurchase = () => {
     return product.in_stock && !isExpired();
+  };
+
+  const handleAddToCart = () => {
+    dispatch(addToCart({ product: { id: product._id, quantity } }));
   };
 
   return (
@@ -139,7 +150,11 @@ export default function ProductCard({ product }: ProductCardProps) {
               size="icon"
               className="h-8 w-8 rounded-r-none"
               onClick={decreaseQuantity}
-              disabled={!isAvailableForPurchase() || quantity <= 1}
+              disabled={
+                !isAvailableForPurchase() ||
+                quantity <= 1 ||
+                isProductExistInCart
+              }
             >
               <Minus className="h-3 w-3" />
               <span className="sr-only">Decrease quantity</span>
@@ -152,7 +167,11 @@ export default function ProductCard({ product }: ProductCardProps) {
               size="icon"
               className="h-8 w-8 rounded-l-none"
               onClick={increaseQuantity}
-              disabled={!isAvailableForPurchase() || quantity >= product.stock}
+              disabled={
+                !isAvailableForPurchase() ||
+                quantity >= product.stock ||
+                isProductExistInCart
+              }
             >
               <Plus className="h-3 w-3" />
               <span className="sr-only">Increase quantity</span>
@@ -169,10 +188,11 @@ export default function ProductCard({ product }: ProductCardProps) {
               variant="default"
               size="sm"
               className="w-full"
-              disabled={!isAvailableForPurchase()}
+              disabled={!isAvailableForPurchase() || isProductExistInCart}
+              onClick={handleAddToCart}
             >
               <ShoppingCart className="mr-2 h-4 w-4" />
-              Add to Cart
+              {isProductExistInCart ? "Added to Cart" : "Add to Cart"}
             </Button>
             <Link
               href={`/products/${product.category_slug}/${product.slug}`}
