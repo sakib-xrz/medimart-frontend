@@ -100,7 +100,7 @@ export default function CartPage() {
   };
 
   const subtotal = calculateSubtotal();
-  const shippingFee = 60;
+  const shippingFee = subtotal > 1000 ? 0 : 50;
   const total = subtotal + shippingFee;
 
   // Update item quantity
@@ -120,7 +120,7 @@ export default function CartPage() {
   };
 
   return (
-    <main className="flex-1 bg-muted/30 py-8 md:py-12">
+    <main className="flex-1 bg-muted/30">
       <Container>
         <h1 className="mb-6 text-3xl font-bold tracking-tight">Your Cart</h1>
 
@@ -270,7 +270,13 @@ export default function CartPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Shipping</span>
-                      <span>BDT ${shippingFee.toFixed(2)}</span>
+                      <span>
+                        {shippingFee === 0 ? (
+                          <span className="text-green-600">Free</span>
+                        ) : (
+                          `BDT ${shippingFee.toFixed(2)}`
+                        )}
+                      </span>
                     </div>
                   </div>
 
@@ -281,6 +287,14 @@ export default function CartPage() {
                     <span>Total</span>
                     <span>BDT {total.toFixed(2)}</span>
                   </div>
+
+                  {/* Free Shipping Notice */}
+                  {subtotal < 1000 && (
+                    <div className="rounded-md bg-primary/10 p-3 text-center text-sm">
+                      Add BDT {(1000 - subtotal).toFixed(2)} more to qualify for
+                      free shipping
+                    </div>
+                  )}
                 </CardContent>
                 <CardFooter>
                   <Button asChild className="w-full gap-2">

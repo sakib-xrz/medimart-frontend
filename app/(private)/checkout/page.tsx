@@ -80,7 +80,7 @@ const calculateSubtotal = () => {
 };
 
 const subtotal = calculateSubtotal();
-const shippingFee = 60;
+const shippingFee = subtotal > 1000 ? 0 : 60;
 const total = subtotal + shippingFee;
 
 // Check if any item requires a prescription
@@ -160,7 +160,7 @@ export default function CheckoutPage() {
   };
 
   return (
-    <main className="flex-1 bg-muted/30 py-8 md:py-12">
+    <main className="flex-1 bg-muted/30">
       <Container>
         <div className="mb-6">
           <Link
@@ -503,7 +503,6 @@ export default function CheckoutPage() {
                               {item.name} {item.requires_prescription && "🔒"}
                             </span>
                             <span className="text-xs text-muted-foreground">
-                              {" "}
                               × {item.quantity}
                             </span>
                           </div>
@@ -525,7 +524,13 @@ export default function CheckoutPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Shipping</span>
-                      <span>BDT {shippingFee.toFixed(2)}</span>
+                      <span>
+                        {shippingFee === 0 ? (
+                          <span className="text-green-600">Free</span>
+                        ) : (
+                          `BDT ${shippingFee.toFixed(2)}`
+                        )}
+                      </span>
                     </div>
                   </div>
 
