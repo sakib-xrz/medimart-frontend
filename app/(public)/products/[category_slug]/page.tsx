@@ -115,6 +115,7 @@ export default function Product({
           setParams={setParams}
           params={params}
           searchKey={searchKey}
+          setSearchKey={setSearchKey}
           handleSearchChange={handleSearchChange}
         />
 

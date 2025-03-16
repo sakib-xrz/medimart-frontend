@@ -24,6 +24,7 @@ interface ProductListHeaderProps {
   params: TParams;
   setParams: (params: TParams) => void;
   searchKey: string;
+  setSearchKey: (value: string) => void;
   handleSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -31,6 +32,7 @@ export default function ProductListHeader({
   params,
   setParams,
   searchKey,
+  setSearchKey,
   handleSearchChange,
 }: ProductListHeaderProps) {
   const [isFilterOpen, setIsFilterOpen] = useState(false);

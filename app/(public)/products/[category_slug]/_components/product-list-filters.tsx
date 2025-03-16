@@ -71,7 +71,7 @@ export default function ProductListFilters({
         </AccordionItem>
 
         {/* Availability Filter */}
-        <AccordionItem value="availability">
+        <AccordionItem value="availability" className="border-b-0">
           <AccordionTrigger className="text-base font-medium">
             Availability
           </AccordionTrigger>
