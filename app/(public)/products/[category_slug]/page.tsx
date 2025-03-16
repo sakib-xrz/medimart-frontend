@@ -136,7 +136,6 @@ export default function Product({
                     setSearchKey("");
                     setParams(() => ({
                       search: "",
-                      category: [],
                       form: [],
                       in_stock: null,
                       requires_prescription: null,
@@ -195,7 +194,6 @@ export default function Product({
                     setSearchKey("");
                     setParams(() => ({
                       search: "",
-                      category: [],
                       form: [],
                       in_stock: null,
                       requires_prescription: null,
