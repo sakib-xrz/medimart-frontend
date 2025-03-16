@@ -23,6 +23,7 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { calculateDiscountedPrice } from "@/lib/utils";
 import Container from "@/components/shared/container";
+import { useCartProducts } from "@/redux/features/cart/cartSlice";
 
 // Mock cart data - in a real app, this would come from a state management solution
 const initialCartItems = [
@@ -81,6 +82,10 @@ const initialCartItems = [
 
 export default function CartPage() {
   const [cartItems, setCartItems] = useState(initialCartItems);
+
+  const cartItemsPayload = useCartProducts();
+
+  console.log(cartItemsPayload);
 
   // Check if any item requires a prescription
   const requiresPrescription = cartItems.some(
