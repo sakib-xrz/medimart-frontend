@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   AlertCircle,
@@ -27,6 +27,8 @@ import { calculateDiscountedPrice, cn, formatExpiryDate } from "@/lib/utils";
 import Container from "@/components/shared/container";
 import { useGetProductDetailQuery } from "@/redux/features/product/productApi";
 import ProductDetailsSkeleton from "./_components/product-details-skeleton";
+import { useDispatch } from "react-redux";
+import { addToCart, useCartProduct } from "@/redux/features/cart/cartSlice";
 
 export default function ProductDetailsPage({
   params,
@@ -36,13 +38,22 @@ export default function ProductDetailsPage({
     product_slug: string;
   };
 }) {
+  const dispatch = useDispatch();
   const [quantity, setQuantity] = useState(1);
 
   const product_slug = params.product_slug;
-
   const { data, isLoading } = useGetProductDetailQuery(product_slug);
-
   const productData = data?.data || {};
+
+  // Get cart status using the product id from productData
+  const productId = productData?._id;
+  const cartProduct = useCartProduct(productId);
+  const isProductExistInCart = !!cartProduct;
+
+  useEffect(() => {
+    setQuantity(cartProduct?.quantity || 1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [productData]);
 
   if (isLoading) {
     return <ProductDetailsSkeleton />;
@@ -65,7 +76,6 @@ export default function ProductDetailsPage({
     const today = new Date();
     const threeMonthsFromNow = new Date();
     threeMonthsFromNow.setMonth(today.getMonth() + 3);
-
     return expiryDate <= threeMonthsFromNow && expiryDate > today;
   };
 
@@ -78,6 +88,10 @@ export default function ProductDetailsPage({
   // Check if product is available for purchase
   const isAvailableForPurchase = () => {
     return productData.in_stock && !isExpired();
+  };
+
+  const handleAddToCart = () => {
+    dispatch(addToCart({ product: { id: productData._id, quantity } }));
   };
 
   return (
@@ -119,17 +133,13 @@ export default function ProductDetailsPage({
           <div className="lg:col-span-2">
             <div className="mb-4 flex flex-wrap items-center gap-2">
               <Badge variant="secondary">{productData.category}</Badge>
-
               {isExpired() && <Badge variant="destructive">Expired</Badge>}
-
               {!isExpired() && !productData.in_stock && (
                 <Badge variant="destructive">Out of Stock</Badge>
               )}
-
               {productData.requires_prescription && (
                 <Badge variant="outline">Prescription Required</Badge>
               )}
-
               {!isExpired() && productData.in_stock && hasDiscount && (
                 <Badge className="border-green-600 bg-green-600 text-white hover:border-green-500/90 hover:bg-green-500/90">
                   {productData.discount_type === "PERCENTAGE"
@@ -163,7 +173,6 @@ export default function ProductDetailsPage({
                 <Info className="h-4 w-4 text-primary" />
                 <span>Manufactured by {productData.manufacturer}</span>
               </div>
-
               {/* Expiry date information */}
               <div
                 className={cn(
@@ -219,7 +228,11 @@ export default function ProductDetailsPage({
                     size="icon"
                     className="h-10 w-10 rounded-r-none"
                     onClick={decreaseQuantity}
-                    disabled={!isAvailableForPurchase() || quantity <= 1}
+                    disabled={
+                      !isAvailableForPurchase() ||
+                      quantity <= 1 ||
+                      isProductExistInCart
+                    }
                   >
                     <Minus className="h-4 w-4" />
                     <span className="sr-only">Decrease quantity</span>
@@ -233,7 +246,9 @@ export default function ProductDetailsPage({
                     className="h-10 w-10 rounded-l-none"
                     onClick={increaseQuantity}
                     disabled={
-                      !isAvailableForPurchase() || quantity >= productData.stock
+                      !isAvailableForPurchase() ||
+                      quantity >= productData.stock ||
+                      isProductExistInCart
                     }
                   >
                     <Plus className="h-4 w-4" />
@@ -245,10 +260,11 @@ export default function ProductDetailsPage({
                   <Button
                     size="lg"
                     className="gap-2"
-                    disabled={!isAvailableForPurchase()}
+                    disabled={!isAvailableForPurchase() || isProductExistInCart}
+                    onClick={handleAddToCart}
                   >
                     <ShoppingCart className="h-5 w-5" />
-                    Add to Cart
+                    {isProductExistInCart ? "Added to Cart" : "Add to Cart"}
                   </Button>
                 </div>
               </div>
