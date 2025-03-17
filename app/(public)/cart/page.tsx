@@ -32,6 +32,7 @@ import {
 } from "@/redux/features/cart/cartSlice";
 import { useGetCartItemsMutation } from "@/redux/features/cart/cartApi";
 import { useDispatch } from "react-redux";
+
 interface ICartItem {
   _id: string;
   name: string;
@@ -53,7 +54,7 @@ export default function CartPage() {
   const dispatch = useDispatch();
   const cartItems = useCartProducts();
   const [getCart] = useGetCartItemsMutation();
-  const [localCart, setLocalCart] = useState([]);
+  const [localCart, setLocalCart] = useState<ICartItem[]>([]);
   const [localSubtotal, setLocalSubtotal] = useState(0);
   const [shippingFee, setShippingFee] = useState(0);
   const [total, setTotal] = useState(0);
@@ -72,6 +73,17 @@ export default function CartPage() {
   }, [cartItems]);
 
   const subtotal = localSubtotal;
+
+  // Check if any item is expired or out of stock
+  const hasUnavailableItems = localCart.some((item) => {
+    return isExpired(item.expiry_date) || !item.in_stock;
+  });
+
+  // Helper function to check if a product is expired
+  function isExpired(expiryDate: string): boolean {
+    if (!expiryDate) return false;
+    return new Date(expiryDate) < new Date();
+  }
 
   return (
     <main className="flex-1 bg-muted/30">
@@ -123,6 +135,19 @@ export default function CartPage() {
                     </Alert>
                   )}
 
+                  {hasUnavailableItems && (
+                    <Alert className="mb-4 border-red-200 bg-red-50 text-red-800">
+                      <AlertDescription className="flex items-start gap-2">
+                        <div>
+                          <AlertCircle className="mt-0.5 size-4" />
+                        </div>
+                        Some items in your cart are expired or out of stock.
+                        These items cannot be purchased and should be removed
+                        before checkout.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
                   <div className="space-y-4">
                     {localCart?.map((item: ICartItem) => {
                       const itemPrice = calculateDiscountedPrice({
@@ -133,6 +158,10 @@ export default function CartPage() {
                       const hasDiscount =
                         item.discount > 0 && itemPrice < item.price;
 
+                      const itemExpired = isExpired(item.expiry_date);
+                      const itemInStock = item.in_stock;
+                      const isAvailable = !itemExpired && itemInStock;
+
                       return (
                         <div key={item._id} className="rounded-lg border p-4">
                           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -142,6 +171,16 @@ export default function CartPage() {
                                 {item.requires_prescription && (
                                   <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-800">
                                     Prescription Required
+                                  </span>
+                                )}
+                                {itemExpired && (
+                                  <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs text-red-800">
+                                    Expired
+                                  </span>
+                                )}
+                                {!itemInStock && !itemExpired && (
+                                  <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs text-red-800">
+                                    Out of Stock
                                   </span>
                                 )}
                               </div>
@@ -166,6 +205,17 @@ export default function CartPage() {
                                   </span>
                                 )}
                               </div>
+                              {itemExpired && (
+                                <p className="text-xs text-red-600">
+                                  This product has expired and cannot be
+                                  purchased.
+                                </p>
+                              )}
+                              {!itemInStock && !itemExpired && (
+                                <p className="text-xs text-red-600">
+                                  This product is currently out of stock.
+                                </p>
+                              )}
                             </div>
                             <div className="flex items-center justify-between gap-4">
                               <div className="flex items-center">
@@ -180,7 +230,7 @@ export default function CartPage() {
                                       }),
                                     )
                                   }
-                                  disabled={item.quantity <= 1}
+                                  disabled={item.quantity <= 1 || !isAvailable}
                                 >
                                   <Minus className="h-3 w-3" />
                                   <span className="sr-only">
@@ -201,6 +251,7 @@ export default function CartPage() {
                                       }),
                                     )
                                   }
+                                  disabled={!isAvailable}
                                 >
                                   <Plus className="h-3 w-3" />
                                   <span className="sr-only">
@@ -275,11 +326,22 @@ export default function CartPage() {
                   )}
                 </CardContent>
                 <CardFooter>
-                  <Button asChild className="w-full gap-2">
-                    <Link href="/checkout">
-                      Proceed to Checkout <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
+                  {hasUnavailableItems ? (
+                    <div className="w-full space-y-2">
+                      <Button disabled className="w-full gap-2">
+                        Proceed to Checkout <ArrowRight className="h-4 w-4" />
+                      </Button>
+                      <p className="text-center text-xs text-red-600">
+                        Please remove expired or out-of-stock items to proceed
+                      </p>
+                    </div>
+                  ) : (
+                    <Button asChild className="w-full gap-2">
+                      <Link href="/checkout">
+                        Proceed to Checkout <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                  )}
                 </CardFooter>
               </Card>
             </div>
