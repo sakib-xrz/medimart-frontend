@@ -58,9 +58,12 @@ export function middleware(request: {
     const allowedRoutes = roleBasedRoutes[role];
 
     if (
-      allowedRoutes.some((route) =>
-        typeof route === "string" ? route === pathname : route.test(pathname),
-      )
+      allowedRoutes.some((route) => {
+        if (typeof route === "string") {
+          return pathname.includes(route);
+        }
+        return route.test(pathname);
+      })
     ) {
       return NextResponse.next();
     } else {
