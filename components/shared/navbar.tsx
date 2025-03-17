@@ -7,6 +7,14 @@ import { Menu, ShoppingCart, User } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Sheet,
   SheetContent,
   SheetTrigger,
@@ -17,12 +25,15 @@ import Container from "./container";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import { useCartCount } from "@/redux/features/cart/cartSlice";
+import { useCurrentUser } from "@/redux/features/auth/authSlice";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
   const cartCount = useCartCount();
+
+  const user = useCurrentUser();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -157,32 +168,66 @@ export function Navbar() {
             Contact
           </Link>
         </nav>
-        <div className="flex items-center gap-1 lg:gap-2">
+        <div className="flex items-center gap-2 lg:gap-3">
           <Link href="/cart">
-            <Button variant="ghost" size="icon" className="relative">
+            <Button variant="link" size="icon" className="relative">
               <ShoppingCart className="h-5 w-5" />
               <span className="sr-only">Shopping Cart</span>
               {cartCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
                   {cartCount}
                 </span>
               )}
             </Button>
           </Link>
-          <Link href="/profile">
-            <Button variant="ghost" size="icon" className="hidden sm:flex">
-              <User className="h-5 w-5" />
-              <span className="sr-only">Account</span>
-            </Button>
-          </Link>
-          <Link href="/login">
-            <Button variant="outline" size="sm" className="hidden sm:flex">
-              Sign In
-            </Button>
-          </Link>
-          <Link href="/register">
-            <Button size="sm">Sign Up</Button>
-          </Link>
+
+          {!user ? (
+            <>
+              <Link href="/login">
+                <Button variant="outline" size="sm" className="hidden sm:flex">
+                  Sign In
+                </Button>
+              </Link>
+              <Link href="/register">
+                <Button size="sm">Sign Up</Button>
+              </Link>
+            </>
+          ) : (
+            <DropdownMenu>
+              <DropdownMenuTrigger className="rounded-full bg-primary p-1 text-background">
+                <User className="h-5 w-5" />
+                <span className="sr-only">Account</span>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="min-w-44 max-w-60" align="end">
+                <DropdownMenuLabel className="truncate">
+                  {user.email}
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="cursor-pointer">
+                  Profile
+                </DropdownMenuItem>
+                {user.role === "ADMIN" && (
+                  <DropdownMenuItem className="cursor-pointer">
+                    Dashboard
+                  </DropdownMenuItem>
+                )}
+
+                {user.role === "CUSTOMER" && (
+                  <DropdownMenuItem className="cursor-pointer">
+                    My Orders
+                  </DropdownMenuItem>
+                )}
+
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="cursor-pointer focus:bg-destructive focus:text-destructive-foreground"
+                  asChild
+                >
+                  <Link href="/logout">Logout</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </Container>
     </header>
