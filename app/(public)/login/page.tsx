@@ -50,8 +50,6 @@ export default function LoginPage() {
       setError("");
       try {
         const response = await userLogin(values);
-        console.log(response);
-
         const accessToken = response?.data?.accessToken;
         dispatch(setToken({ token: accessToken }));
         toast.success("Logged in successfully");
@@ -96,10 +94,14 @@ export default function LoginPage() {
                     type="email"
                     placeholder="name@example.com"
                     className="pl-10"
-                    required
                     {...formik.getFieldProps("email")}
                   />
                 </div>
+                {formik.touched.email && formik.errors.email && (
+                  <div className="mt-1 text-xs text-red-500">
+                    {formik.errors.email}
+                  </div>
+                )}
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -112,7 +114,6 @@ export default function LoginPage() {
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     className="pl-10 pr-10"
-                    required
                     {...formik.getFieldProps("password")}
                   />
                   <Button
@@ -132,6 +133,11 @@ export default function LoginPage() {
                     </span>
                   </Button>
                 </div>
+                {formik.touched.password && formik.errors.password && (
+                  <div className="mt-1 text-xs text-red-500">
+                    {formik.errors.password}
+                  </div>
+                )}
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Signing in..." : "Sign In"}
