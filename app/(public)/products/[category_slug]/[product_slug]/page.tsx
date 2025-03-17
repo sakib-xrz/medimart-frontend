@@ -301,15 +301,24 @@ export default function ProductDetailsPage({
             {isExpired() ? (
               <Alert className="mb-6 border-red-200 bg-red-50 text-red-800">
                 <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Product Expired</AlertTitle>
+                <AlertTitle className="flex items-center gap-2">
+                  <div>
+                    <AlertCircle className="size-4" />
+                  </div>{" "}
+                  Product Expired
+                </AlertTitle>
                 <AlertDescription>
                   This product has expired and is not available for purchase.
                 </AlertDescription>
               </Alert>
             ) : !productData.in_stock ? (
               <Alert className="mb-6 border-red-200 bg-red-50 text-red-800">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Out of Stock</AlertTitle>
+                <AlertTitle className="flex items-center gap-2">
+                  <div>
+                    <AlertCircle className="size-4" />
+                  </div>{" "}
+                  Out of Stock
+                </AlertTitle>
                 <AlertDescription>
                   This product is currently out of stock. Please check back
                   later.
@@ -317,8 +326,12 @@ export default function ProductDetailsPage({
               </Alert>
             ) : productData.requires_prescription ? (
               <Alert className="mb-6 border-amber-200 bg-amber-50 text-amber-800">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Prescription Required</AlertTitle>
+                <AlertTitle className="flex items-center gap-2">
+                  <div>
+                    <AlertCircle className="size-4" />
+                  </div>{" "}
+                  Prescription Required
+                </AlertTitle>
                 <AlertDescription>
                   This medication requires a valid prescription. Please upload
                   your prescription during checkout.

@@ -134,7 +134,9 @@ export default function ProductCard({ product }: ProductCardProps) {
             isExpired() && "text-red-600",
           )}
         >
-          <Clock className="mr-1 h-3 w-3" />
+          <div>
+            <Clock className="mr-1 mt-[1px] h-3 w-3" />
+          </div>
           <span>
             {isExpired()
               ? `Expired on ${formatExpiryDate(product.expiry_date)}`
