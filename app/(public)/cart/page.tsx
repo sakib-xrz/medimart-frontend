@@ -32,6 +32,9 @@ import {
 } from "@/redux/features/cart/cartSlice";
 import { useGetCartItemsMutation } from "@/redux/features/cart/cartApi";
 import { useDispatch } from "react-redux";
+import { useCurrentUser } from "@/redux/features/auth/authSlice";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface ICartItem {
   _id: string;
@@ -51,7 +54,11 @@ interface ICartItem {
 }
 
 export default function CartPage() {
+  const router = useRouter();
   const dispatch = useDispatch();
+
+  const user = useCurrentUser();
+
   const cartItems = useCartProducts();
   const [getCart] = useGetCartItemsMutation();
   const [localCart, setLocalCart] = useState<ICartItem[]>([]);
@@ -336,10 +343,19 @@ export default function CartPage() {
                       </p>
                     </div>
                   ) : (
-                    <Button asChild className="w-full gap-2">
-                      <Link href="/checkout">
-                        Proceed to Checkout <ArrowRight className="h-4 w-4" />
-                      </Link>
+                    <Button
+                      className="w-full gap-2"
+                      onClick={() => {
+                        if (user && user?.role === "ADMIN") {
+                          toast.warning(
+                            "Only customers can proceed to checkout.",
+                          );
+                        } else {
+                          router.push("/checkout");
+                        }
+                      }}
+                    >
+                      Proceed to Checkout <ArrowRight className="h-4 w-4" />
                     </Button>
                   )}
                 </CardFooter>
