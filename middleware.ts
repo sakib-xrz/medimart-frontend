@@ -45,7 +45,7 @@ export function middleware(request: {
   const role = decodedData?.role;
 
   if (AuthRoutes.includes(pathname)) {
-    if (pathname === "/login") {
+    if (pathname === "/login" || pathname === "/register") {
       return NextResponse.redirect(new URL(`/`, request.url));
     }
   }

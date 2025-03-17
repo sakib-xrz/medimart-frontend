@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
@@ -34,90 +34,70 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import Container from "@/components/shared/container";
+import { useGetCartItemsMutation } from "@/redux/features/cart/cartApi";
+import { useCartProducts } from "@/redux/features/cart/cartSlice";
+import { useGetProfileQuery } from "@/redux/features/profile/profileApi";
 
-// Mock cart data - in a real app, this would come from a state management solution
-const cartItems = [
-  {
-    id: "67cb1d68714acf32241d5140",
-    name: "Medical Tape",
-    price: 90,
-    discount: 5,
-    discount_type: "PERCENTAGE",
-    quantity: 2,
-    requires_prescription: false,
-  },
-  {
-    id: "67cb1d68714acf32241d513e",
-    name: "Hydrogen Peroxide Solution 3%",
-    price: 120,
-    discount: 10,
-    discount_type: "PERCENTAGE",
-    quantity: 1,
-    requires_prescription: false,
-  },
-  {
-    id: "67cb1d68714acf32241d5149",
-    name: "Amoxicillin 500mg",
-    price: 180,
-    discount: 0,
-    discount_type: "PERCENTAGE",
-    quantity: 1,
-    requires_prescription: true,
-  },
-];
+interface ICartProduct {
+  _id: string;
+  name: string;
+  slug: string;
+  price: number;
+  category: string;
+  dosage: string;
+  form: string;
+  description: string;
+  requires_prescription: boolean;
+  discount: number;
+  discount_type: "PERCENTAGE" | "FLAT";
+  in_stock: boolean;
+  expiry_date: string;
+  quantity: number;
+}
 
-// Calculate cart totals
-const calculateSubtotal = () => {
-  return cartItems.reduce((total, item) => {
-    const itemPrice =
-      item.discount > 0
-        ? item.discount_type === "PERCENTAGE"
-          ? item.price - (item.price * item.discount) / 100
-          : item.price - item.discount
-        : item.price;
-    return total + itemPrice * item.quantity;
-  }, 0);
-};
-
-const subtotal = calculateSubtotal();
-const shippingFee = subtotal > 1000 ? 0 : 60;
-const total = subtotal + shippingFee;
-
-// Check if any item requires a prescription
-const requiresPrescription = cartItems.some(
-  (item) => item.requires_prescription,
-);
-
-// Validation schema
-const validationSchema = Yup.object({
-  fullName: Yup.string().required("Full name is required"),
-  email: Yup.string()
-    .email("Invalid email address")
-    .required("Email is required"),
-  phone: Yup.string()
-    .matches(/^[0-9]{11}$/, "Phone number must be 11 digits")
-    .required("Phone number is required"),
-  address: Yup.string().required("Address is required"),
-  city: Yup.string().required("City is required"),
-  postalCode: Yup.string().required("Postal code is required"),
-  notes: Yup.string(),
-  prescription: requiresPrescription
-    ? Yup.mixed().required(
-        "Prescription is required for some items in your cart",
-      )
-    : Yup.mixed(),
-  paymentMethod: Yup.string().required("Payment method is required"),
-});
+interface ICartData {
+  products: ICartProduct[];
+  subtotal: number;
+  shipping_charge: number;
+  grand_total: number;
+  prescription_required: boolean;
+}
 
 export default function CheckoutPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [cartData, setCartData] = useState<ICartData>({
+    products: [],
+    subtotal: 0,
+    shipping_charge: 0,
+    grand_total: 0,
+    prescription_required: false,
+  });
   const [prescriptionFile, setPrescriptionFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const cartItems = useCartProducts();
+  const [getCart] = useGetCartItemsMutation();
+
+  const { data: profileData } = useGetProfileQuery({});
+
+  useEffect(() => {
+    getCart({ cart_items: cartItems }).then(({ data }) => {
+      setCartData(data?.data);
+    });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cartItems]);
+
+  const cartProducts = cartData?.products || [];
+  const subtotal = cartData?.subtotal || 0;
+  const shippingFee = cartData?.shipping_charge || 0;
+  const total = cartData?.grand_total || 0;
+  const requiresPrescription = cartData?.prescription_required || false;
+
   const formik = useFormik({
     initialValues: {
-      fullName: "",
+      name: "",
       email: "",
       phone: "",
       address: "",
@@ -127,13 +107,29 @@ export default function CheckoutPage() {
       prescription: undefined,
       paymentMethod: "sslcommerz",
     },
-    validationSchema,
+    validationSchema: Yup.object({
+      fullName: Yup.string().required("Full name is required"),
+      email: Yup.string()
+        .email("Invalid email address")
+        .required("Email is required"),
+      phone: Yup.string()
+        .matches(/^[0-9]{11}$/, "Phone number must be 11 digits")
+        .required("Phone number is required"),
+      address: Yup.string().required("Address is required"),
+      city: Yup.string().required("City is required"),
+      postalCode: Yup.string().required("Postal code is required"),
+      notes: Yup.string(),
+      prescription: requiresPrescription
+        ? Yup.mixed().required(
+            "Prescription is required for some items in your cart",
+          )
+        : Yup.mixed(),
+      paymentMethod: Yup.string().required("Payment method is required"),
+    }),
     onSubmit: async (values) => {
       setIsSubmitting(true);
 
       try {
-        // In a real app, you would send the form data to your backend
-        // This is just a simulation for demo purposes
         console.log("Form values:", values);
         console.log("Prescription file:", prescriptionFile);
 
@@ -148,6 +144,15 @@ export default function CheckoutPage() {
       }
     },
   });
+
+  useEffect(() => {
+    if (profileData) {
+      formik.setFieldValue("name", profileData?.data?.name);
+      formik.setFieldValue("email", profileData?.data?.email);
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profileData]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
@@ -195,18 +200,18 @@ export default function CheckoutPage() {
                         id="fullName"
                         name="fullName"
                         placeholder="John Doe"
-                        value={formik.values.fullName}
+                        value={formik.values.name}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
                         className={cn(
-                          formik.touched.fullName &&
-                            formik.errors.fullName &&
+                          formik.touched.name &&
+                            formik.errors.name &&
                             "border-red-500",
                         )}
                       />
-                      {formik.touched.fullName && formik.errors.fullName && (
+                      {formik.touched.name && formik.errors.name && (
                         <p className="text-xs text-red-500">
-                          {formik.errors.fullName}
+                          {formik.errors.name}
                         </p>
                       )}
                     </div>
@@ -355,8 +360,10 @@ export default function CheckoutPage() {
                   </CardHeader>
                   <CardContent>
                     <Alert className="mb-4 border-amber-200 bg-amber-50 text-amber-800">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertDescription>
+                      <AlertDescription className="flex items-start gap-2">
+                        <div>
+                          <AlertCircle className="mt-0.5 size-4" />
+                        </div>
                         Your cart contains prescription medication. Please
                         upload a valid prescription to proceed.
                       </AlertDescription>
@@ -488,7 +495,7 @@ export default function CheckoutPage() {
                 <CardContent className="space-y-4">
                   {/* Items */}
                   <div className="space-y-2">
-                    {cartItems.map((item) => {
+                    {cartProducts.map((item) => {
                       const itemPrice =
                         item.discount > 0
                           ? item.discount_type === "PERCENTAGE"
@@ -497,7 +504,7 @@ export default function CheckoutPage() {
                           : item.price;
 
                       return (
-                        <div key={item.id} className="flex justify-between">
+                        <div key={item._id} className="flex justify-between">
                           <div className="flex-1">
                             <span className="text-sm">
                               {item.name} {item.requires_prescription && "🔒"}
