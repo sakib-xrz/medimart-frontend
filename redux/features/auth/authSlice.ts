@@ -38,12 +38,13 @@ export const useAuthToken = (): string | null => {
 interface DecodedUser {
   id: string;
   email: string;
+  role: string;
   exp: number;
   iat: number;
   [key: string]: unknown;
 }
 
-export const useUser = (): DecodedUser | null => {
+export const useCurrentUser = (): DecodedUser | null => {
   const token = useAuthToken();
 
   if (!token) return null;

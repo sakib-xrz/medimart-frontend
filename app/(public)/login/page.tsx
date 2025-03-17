@@ -1,5 +1,6 @@
 "use client";
 
+import * as Yup from "yup";
 import type React from "react";
 
 import { useState } from "react";
@@ -17,15 +18,52 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-// import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import Container from "@/components/shared/container";
+import { useFormik } from "formik";
+import { toast } from "sonner";
+import userLogin from "@/service/auth/userLogin";
+import { useDispatch } from "react-redux";
+import { setToken } from "@/redux/features/auth/authSlice";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
-  // const [error, setError] = useState("");
-  // const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const loginSchema = Yup.object({
+    email: Yup.string()
+      .email("Invalid email address")
+      .required("Email is required"),
+    password: Yup.string().required("Password is required"),
+  });
+
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validationSchema: loginSchema,
+    onSubmit: async (values) => {
+      setIsLoading(true);
+      setError("");
+      try {
+        const response = await userLogin(values);
+        console.log(response);
+
+        const accessToken = response?.data?.accessToken;
+        dispatch(setToken({ token: accessToken }));
+        toast.success("Logged in successfully");
+      } catch (error) {
+        formik.resetForm();
+        // @ts-expect-error Error message is a string
+        setError(error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+  });
 
   return (
     <main className="flex-1 bg-muted/30 py-12 md:py-16 lg:py-20">
@@ -38,12 +76,17 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {/* {error && (
-              <Alert variant="destructive" className="mb-4">
-                <AlertDescription>{error}</AlertDescription>
+            {error && (
+              <Alert
+                variant="destructive"
+                className="mb-4 bg-destructive/10 text-center"
+              >
+                <AlertDescription className="font-medium">
+                  {error}
+                </AlertDescription>
               </Alert>
-            )} */}
-            <form className="space-y-4">
+            )}
+            <form className="space-y-4" onSubmit={formik.handleSubmit}>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <div className="relative">
@@ -53,9 +96,8 @@ export default function LoginPage() {
                     type="email"
                     placeholder="name@example.com"
                     className="pl-10"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
                     required
+                    {...formik.getFieldProps("email")}
                   />
                 </div>
               </div>
@@ -70,9 +112,8 @@ export default function LoginPage() {
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     className="pl-10 pr-10"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
                     required
+                    {...formik.getFieldProps("password")}
                   />
                   <Button
                     type="button"
@@ -92,9 +133,8 @@ export default function LoginPage() {
                   </Button>
                 </div>
               </div>
-              <Button type="submit" className="w-full">
-                {/* {isLoading ? "Signing in..." : "Sign In"} */}
-                Sign In
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Signing in..." : "Sign In"}
               </Button>
             </form>
           </CardContent>
