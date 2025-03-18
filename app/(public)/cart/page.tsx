@@ -97,7 +97,7 @@ export default function CartPage() {
       <Container>
         <div className="flex items-center justify-between">
           <h1 className="mb-6 text-3xl font-bold tracking-tight">Your Cart</h1>
-          {localCart.length > 0 && (
+          {cartItems.length > 0 && (
             <p
               className="cursor-pointer text-muted-foreground hover:text-destructive hover:underline"
               onClick={() => dispatch(clearCart())}

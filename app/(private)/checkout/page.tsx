@@ -108,7 +108,7 @@ export default function CheckoutPage() {
       paymentMethod: "sslcommerz",
     },
     validationSchema: Yup.object({
-      fullName: Yup.string().required("Full name is required"),
+      name: Yup.string().required("Name is required"),
       email: Yup.string()
         .email("Invalid email address")
         .required("Email is required"),
@@ -193,21 +193,18 @@ export default function CheckoutPage() {
                 <CardContent className="space-y-4">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="fullName">
+                      <Label htmlFor="name">
                         Full Name <span className="text-red-500">*</span>
                       </Label>
                       <Input
-                        id="fullName"
-                        name="fullName"
+                        id="name"
                         placeholder="John Doe"
-                        value={formik.values.name}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
                         className={cn(
                           formik.touched.name &&
                             formik.errors.name &&
                             "border-red-500",
                         )}
+                        {...formik.getFieldProps("name")}
                       />
                       {formik.touched.name && formik.errors.name && (
                         <p className="text-xs text-red-500">
@@ -221,17 +218,14 @@ export default function CheckoutPage() {
                       </Label>
                       <Input
                         id="email"
-                        name="email"
                         type="email"
                         placeholder="john@example.com"
-                        value={formik.values.email}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
                         className={cn(
                           formik.touched.email &&
                             formik.errors.email &&
                             "border-red-500",
                         )}
+                        {...formik.getFieldProps("email")}
                       />
                       {formik.touched.email && formik.errors.email && (
                         <p className="text-xs text-red-500">
@@ -246,16 +240,13 @@ export default function CheckoutPage() {
                     </Label>
                     <Input
                       id="phone"
-                      name="phone"
                       placeholder="01XXXXXXXXX"
-                      value={formik.values.phone}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
                       className={cn(
                         formik.touched.phone &&
                           formik.errors.phone &&
                           "border-red-500",
                       )}
+                      {...formik.getFieldProps("phone")}
                     />
                     {formik.touched.phone && formik.errors.phone && (
                       <p className="text-xs text-red-500">
@@ -269,16 +260,13 @@ export default function CheckoutPage() {
                     </Label>
                     <Textarea
                       id="address"
-                      name="address"
                       placeholder="123 Main St, Apartment 4B"
-                      value={formik.values.address}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
                       className={cn(
                         formik.touched.address &&
                           formik.errors.address &&
                           "border-red-500",
                       )}
+                      {...formik.getFieldProps("address")}
                     />
                     {formik.touched.address && formik.errors.address && (
                       <p className="text-xs text-red-500">
@@ -293,16 +281,13 @@ export default function CheckoutPage() {
                       </Label>
                       <Input
                         id="city"
-                        name="city"
                         placeholder="Dhaka"
-                        value={formik.values.city}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
                         className={cn(
                           formik.touched.city &&
                             formik.errors.city &&
                             "border-red-500",
                         )}
+                        {...formik.getFieldProps("city")}
                       />
                       {formik.touched.city && formik.errors.city && (
                         <p className="text-xs text-red-500">
@@ -316,16 +301,13 @@ export default function CheckoutPage() {
                       </Label>
                       <Input
                         id="postalCode"
-                        name="postalCode"
                         placeholder="1200"
-                        value={formik.values.postalCode}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
                         className={cn(
                           formik.touched.postalCode &&
                             formik.errors.postalCode &&
                             "border-red-500",
                         )}
+                        {...formik.getFieldProps("postalCode")}
                       />
                       {formik.touched.postalCode &&
                         formik.errors.postalCode && (
@@ -339,11 +321,19 @@ export default function CheckoutPage() {
                     <Label htmlFor="notes">Order Notes (Optional)</Label>
                     <Textarea
                       id="notes"
-                      name="notes"
                       placeholder="Special instructions for delivery"
-                      value={formik.values.notes}
-                      onChange={formik.handleChange}
+                      className={cn(
+                        formik.touched.notes &&
+                          formik.errors.notes &&
+                          "border-red-500",
+                      )}
+                      {...formik.getFieldProps("notes")}
                     />
+                    {formik.touched.notes && formik.errors.notes && (
+                      <p className="text-xs text-red-500">
+                        {formik.errors.notes}
+                      </p>
+                    )}
                   </div>
                 </CardContent>
               </Card>
