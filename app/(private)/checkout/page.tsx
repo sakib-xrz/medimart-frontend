@@ -37,6 +37,7 @@ import Container from "@/components/shared/container";
 import { useGetCartItemsMutation } from "@/redux/features/cart/cartApi";
 import { useCartProducts } from "@/redux/features/cart/cartSlice";
 import { useGetProfileQuery } from "@/redux/features/profile/profileApi";
+import { useCreateOrderMutation } from "@/redux/features/order/orderApi";
 
 interface ICartProduct {
   _id: string;
@@ -78,6 +79,7 @@ export default function CheckoutPage() {
 
   const cartItems = useCartProducts();
   const [getCart] = useGetCartItemsMutation();
+  const [createOrder] = useCreateOrderMutation();
 
   const { data: profileData } = useGetProfileQuery({});
 
@@ -129,12 +131,29 @@ export default function CheckoutPage() {
     onSubmit: async (values) => {
       setIsSubmitting(true);
 
-      try {
-        console.log("Form values:", values);
-        console.log("Prescription file:", prescriptionFile);
+      const orderItems = cartProducts.map((product) => ({
+        product_id: product._id,
+        quantity: product.quantity,
+      }));
 
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+      const formData = new FormData();
+      formData.append("name", values.name);
+      formData.append("email", values.email);
+      formData.append("phone", values.phone);
+      formData.append("address", values.address);
+      formData.append("city", values.city);
+      formData.append("postalCode", values.postalCode);
+      formData.append("notes", values.notes || "");
+      formData.append("paymentMethod", values.paymentMethod);
+      // Append cart details
+      formData.append("products", JSON.stringify(orderItems));
+      // Append prescription file
+      if (prescriptionFile) {
+        formData.append("prescription", prescriptionFile);
+      }
+
+      try {
+        await createOrder(formData).unwrap();
 
         // Redirect to success page
         router.push("/checkout/success");
