@@ -35,9 +35,10 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import Container from "@/components/shared/container";
 import { useGetCartItemsMutation } from "@/redux/features/cart/cartApi";
-import { useCartProducts } from "@/redux/features/cart/cartSlice";
+import { clearCart, useCartProducts } from "@/redux/features/cart/cartSlice";
 import { useGetProfileQuery } from "@/redux/features/profile/profileApi";
 import { useCreateOrderMutation } from "@/redux/features/order/orderApi";
+import { useDispatch } from "react-redux";
 
 interface ICartProduct {
   _id: string;
@@ -66,6 +67,7 @@ interface ICartData {
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [cartData, setCartData] = useState<ICartData>({
     products: [],
@@ -99,34 +101,34 @@ export default function CheckoutPage() {
 
   const formik = useFormik({
     initialValues: {
-      name: "",
-      email: "",
-      phone: "",
+      customer_name: "",
+      customer_email: "",
+      customer_phone: "",
       address: "",
       city: "",
-      postalCode: "",
+      postal_code: "",
       notes: "",
       prescription: undefined,
-      paymentMethod: "sslcommerz",
+      payment_method: "sslcommerz",
     },
     validationSchema: Yup.object({
-      name: Yup.string().required("Name is required"),
-      email: Yup.string()
+      customer_name: Yup.string().required("Name is required"),
+      customer_email: Yup.string()
         .email("Invalid email address")
         .required("Email is required"),
-      phone: Yup.string()
+      customer_phone: Yup.string()
         .matches(/^[0-9]{11}$/, "Phone number must be 11 digits")
         .required("Phone number is required"),
       address: Yup.string().required("Address is required"),
       city: Yup.string().required("City is required"),
-      postalCode: Yup.string().required("Postal code is required"),
+      postal_code: Yup.string().required("Postal code is required"),
       notes: Yup.string(),
       prescription: requiresPrescription
         ? Yup.mixed().required(
             "Prescription is required for some items in your cart",
           )
         : Yup.mixed(),
-      paymentMethod: Yup.string().required("Payment method is required"),
+      payment_method: Yup.string().required("Payment method is required"),
     }),
     onSubmit: async (values) => {
       setIsSubmitting(true);
@@ -137,14 +139,14 @@ export default function CheckoutPage() {
       }));
 
       const formData = new FormData();
-      formData.append("name", values.name);
-      formData.append("email", values.email);
-      formData.append("phone", values.phone);
+      formData.append("customer_name", values.customer_name);
+      formData.append("customer_email", values.customer_email);
+      formData.append("customer_phone", values.customer_phone);
       formData.append("address", values.address);
       formData.append("city", values.city);
-      formData.append("postalCode", values.postalCode);
+      formData.append("postal_code", values.postal_code);
       formData.append("notes", values.notes || "");
-      formData.append("paymentMethod", values.paymentMethod);
+      formData.append("payment_method", values.payment_method);
       // Append cart details
       formData.append("products", JSON.stringify(orderItems));
       // Append prescription file
@@ -154,11 +156,12 @@ export default function CheckoutPage() {
 
       try {
         await createOrder(formData).unwrap();
-
+        dispatch(clearCart());
         // Redirect to success page
-        router.push("/checkout/success");
+        router.push("/");
       } catch (error) {
         console.error("Checkout error:", error);
+      } finally {
         setIsSubmitting(false);
       }
     },
@@ -166,8 +169,8 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     if (profileData) {
-      formik.setFieldValue("name", profileData?.data?.name);
-      formik.setFieldValue("email", profileData?.data?.email);
+      formik.setFieldValue("customer_name", profileData?.data?.name);
+      formik.setFieldValue("customer_email", profileData?.data?.email);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -212,66 +215,69 @@ export default function CheckoutPage() {
                 <CardContent className="space-y-4">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="name">
-                        Full Name <span className="text-red-500">*</span>
+                      <Label htmlFor="customer_name">
+                        Name <span className="text-red-500">*</span>
                       </Label>
                       <Input
-                        id="name"
+                        id="customer_name"
                         placeholder="John Doe"
                         className={cn(
-                          formik.touched.name &&
-                            formik.errors.name &&
+                          formik.touched.customer_name &&
+                            formik.errors.customer_name &&
                             "border-red-500",
                         )}
-                        {...formik.getFieldProps("name")}
+                        {...formik.getFieldProps("customer_name")}
                       />
-                      {formik.touched.name && formik.errors.name && (
-                        <p className="text-xs text-red-500">
-                          {formik.errors.name}
-                        </p>
-                      )}
+                      {formik.touched.customer_name &&
+                        formik.errors.customer_name && (
+                          <p className="text-xs text-red-500">
+                            {formik.errors.customer_name}
+                          </p>
+                        )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="email">
+                      <Label htmlFor="customer_email">
                         Email <span className="text-red-500">*</span>
                       </Label>
                       <Input
-                        id="email"
+                        id="customer_email"
                         type="email"
                         placeholder="john@example.com"
                         className={cn(
-                          formik.touched.email &&
-                            formik.errors.email &&
+                          formik.touched.customer_email &&
+                            formik.errors.customer_email &&
                             "border-red-500",
                         )}
-                        {...formik.getFieldProps("email")}
+                        {...formik.getFieldProps("customer_email")}
                       />
-                      {formik.touched.email && formik.errors.email && (
-                        <p className="text-xs text-red-500">
-                          {formik.errors.email}
-                        </p>
-                      )}
+                      {formik.touched.customer_email &&
+                        formik.errors.customer_email && (
+                          <p className="text-xs text-red-500">
+                            {formik.errors.customer_email}
+                          </p>
+                        )}
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone">
+                    <Label htmlFor="customer_phone">
                       Phone Number <span className="text-red-500">*</span>
                     </Label>
                     <Input
-                      id="phone"
+                      id="customer_phone"
                       placeholder="01XXXXXXXXX"
                       className={cn(
-                        formik.touched.phone &&
-                          formik.errors.phone &&
+                        formik.touched.customer_phone &&
+                          formik.errors.customer_phone &&
                           "border-red-500",
                       )}
-                      {...formik.getFieldProps("phone")}
+                      {...formik.getFieldProps("customer_phone")}
                     />
-                    {formik.touched.phone && formik.errors.phone && (
-                      <p className="text-xs text-red-500">
-                        {formik.errors.phone}
-                      </p>
-                    )}
+                    {formik.touched.customer_phone &&
+                      formik.errors.customer_phone && (
+                        <p className="text-xs text-red-500">
+                          {formik.errors.customer_phone}
+                        </p>
+                      )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="address">
@@ -315,23 +321,23 @@ export default function CheckoutPage() {
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="postalCode">
+                      <Label htmlFor="postal_code">
                         Postal Code <span className="text-red-500">*</span>
                       </Label>
                       <Input
-                        id="postalCode"
+                        id="postal_code"
                         placeholder="1200"
                         className={cn(
-                          formik.touched.postalCode &&
-                            formik.errors.postalCode &&
+                          formik.touched.postal_code &&
+                            formik.errors.postal_code &&
                             "border-red-500",
                         )}
-                        {...formik.getFieldProps("postalCode")}
+                        {...formik.getFieldProps("postal_code")}
                       />
-                      {formik.touched.postalCode &&
-                        formik.errors.postalCode && (
+                      {formik.touched.postal_code &&
+                        formik.errors.postal_code && (
                           <p className="text-xs text-red-500">
-                            {formik.errors.postalCode}
+                            {formik.errors.postal_code}
                           </p>
                         )}
                     </div>
@@ -462,10 +468,10 @@ export default function CheckoutPage() {
                 </CardHeader>
                 <CardContent>
                   <RadioGroup
-                    name="paymentMethod"
-                    value={formik.values.paymentMethod}
+                    name="payment_method"
+                    value={formik.values.payment_method}
                     onValueChange={(value) =>
-                      formik.setFieldValue("paymentMethod", value)
+                      formik.setFieldValue("payment_method", value)
                     }
                     className="space-y-3"
                   >
