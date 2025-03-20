@@ -36,7 +36,7 @@ export function Navbar() {
   const user = useCurrentUser();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 print:hidden">
       <Container className="flex h-16 items-center justify-between">
         <div className="flex items-center gap-1 md:gap-4">
           <Sheet open={isOpen} onOpenChange={setIsOpen}>

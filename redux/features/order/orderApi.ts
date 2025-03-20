@@ -8,6 +8,11 @@ export const orderApi = baseApi.injectEndpoints({
       providesTags: [tagTypes.order],
     }),
 
+    myOrder: builder.query({
+      query: (orderId) => `/orders/my-orders/${orderId}`,
+      providesTags: [tagTypes.order],
+    }),
+
     createOrder: builder.mutation({
       query: (data) => ({
         url: `/orders`,
@@ -19,4 +24,5 @@ export const orderApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useCreateOrderMutation, useMyOrdersQuery } = orderApi;
+export const { useCreateOrderMutation, useMyOrderQuery, useMyOrdersQuery } =
+  orderApi;
