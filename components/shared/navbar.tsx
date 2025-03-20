@@ -194,7 +194,7 @@ export function Navbar() {
             </>
           ) : (
             <DropdownMenu>
-              <DropdownMenuTrigger className="rounded-full bg-primary p-1 text-background">
+              <DropdownMenuTrigger className="rounded-full bg-primary p-1 text-background focus-visible:outline-none">
                 <User className="h-5 w-5" />
                 <span className="sr-only">Account</span>
               </DropdownMenuTrigger>
