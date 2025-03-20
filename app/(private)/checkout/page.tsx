@@ -4,7 +4,6 @@ import type React from "react";
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
@@ -39,6 +38,7 @@ import { clearCart, useCartProducts } from "@/redux/features/cart/cartSlice";
 import { useGetProfileQuery } from "@/redux/features/profile/profileApi";
 import { useCreateOrderMutation } from "@/redux/features/order/orderApi";
 import { useDispatch } from "react-redux";
+import { useCreatePaymentIntentMutation } from "@/redux/features/payment/paymentApi";
 
 interface ICartProduct {
   _id: string;
@@ -66,7 +66,6 @@ interface ICartData {
 }
 
 export default function CheckoutPage() {
-  const router = useRouter();
   const dispatch = useDispatch();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [cartData, setCartData] = useState<ICartData>({
@@ -82,6 +81,7 @@ export default function CheckoutPage() {
   const cartItems = useCartProducts();
   const [getCart] = useGetCartItemsMutation();
   const [createOrder] = useCreateOrderMutation();
+  const [createPaymentIntent] = useCreatePaymentIntentMutation();
 
   const { data: profileData } = useGetProfileQuery({});
 
@@ -147,18 +147,24 @@ export default function CheckoutPage() {
       formData.append("postal_code", values.postal_code);
       formData.append("notes", values.notes || "");
       formData.append("payment_method", values.payment_method);
-      // Append cart details
       formData.append("products", JSON.stringify(orderItems));
-      // Append prescription file
+
+      // Append prescription file if required
       if (prescriptionFile) {
         formData.append("prescription", prescriptionFile);
       }
 
       try {
-        await createOrder(formData).unwrap();
-        dispatch(clearCart());
-        // Redirect to success page
-        router.push("/");
+        const res = await createOrder(formData).unwrap();
+        if (res.success) {
+          dispatch(clearCart());
+          const orderId = res.data._id;
+          const paymentRes = await createPaymentIntent(orderId).unwrap();
+          if (paymentRes.success) {
+            const paymentIntent = paymentRes.data;
+            window.location.href = paymentIntent.paymentURL;
+          }
+        }
       } catch (error) {
         console.error("Checkout error:", error);
       } finally {
