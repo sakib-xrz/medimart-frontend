@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { CheckCircle, Package, ShoppingBag } from "lucide-react";
 
@@ -11,6 +13,9 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import Container from "@/components/shared/container";
+import { useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { clearCart } from "@/redux/features/cart/cartSlice";
 
 export default function PaymentSuccess({
   searchParams,
@@ -20,6 +25,12 @@ export default function PaymentSuccess({
   };
 }) {
   const orderId = searchParams?.order_id;
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(clearCart());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <main className="bg-muted/30">

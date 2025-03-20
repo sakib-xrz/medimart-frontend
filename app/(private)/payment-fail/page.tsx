@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { AlertTriangle, ArrowLeft, RefreshCw } from "lucide-react";
 
@@ -12,8 +14,17 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Container from "@/components/shared/container";
+import { useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { clearCart } from "@/redux/features/cart/cartSlice";
 
 export default function PaymentFail() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(clearCart());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
     <main className="bg-muted/30">
       <Container>

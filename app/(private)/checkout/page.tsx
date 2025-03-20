@@ -34,10 +34,9 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import Container from "@/components/shared/container";
 import { useGetCartItemsMutation } from "@/redux/features/cart/cartApi";
-import { clearCart, useCartProducts } from "@/redux/features/cart/cartSlice";
+import { useCartProducts } from "@/redux/features/cart/cartSlice";
 import { useGetProfileQuery } from "@/redux/features/profile/profileApi";
 import { useCreateOrderMutation } from "@/redux/features/order/orderApi";
-import { useDispatch } from "react-redux";
 import { useCreatePaymentIntentMutation } from "@/redux/features/payment/paymentApi";
 
 interface ICartProduct {
@@ -66,7 +65,6 @@ interface ICartData {
 }
 
 export default function CheckoutPage() {
-  const dispatch = useDispatch();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [cartData, setCartData] = useState<ICartData>({
     products: [],
@@ -157,7 +155,6 @@ export default function CheckoutPage() {
       try {
         const res = await createOrder(formData).unwrap();
         if (res.success) {
-          dispatch(clearCart());
           const orderId = res.data._id;
           const paymentRes = await createPaymentIntent(orderId).unwrap();
           if (paymentRes.success) {
