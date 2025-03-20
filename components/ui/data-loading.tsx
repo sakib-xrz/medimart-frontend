@@ -21,19 +21,11 @@ export function DataLoading({
   const [showLoading, setShowLoading] = useState(isLoading);
 
   useEffect(() => {
-    let timeout: NodeJS.Timeout;
-
     if (isLoading) {
-      timeout = setTimeout(() => {
-        setShowLoading(true);
-      }, 300); // Small delay to prevent flashing for quick loads
+      setShowLoading(true);
     } else {
       setShowLoading(false);
     }
-
-    return () => {
-      clearTimeout(timeout);
-    };
   }, [isLoading]);
 
   if (showLoading) {

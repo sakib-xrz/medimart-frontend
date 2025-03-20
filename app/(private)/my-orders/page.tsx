@@ -84,37 +84,37 @@ const getOrderStatusBadge = (status: string) => {
   switch (status) {
     case "PLACED":
       return (
-        <Badge className="rounded-full bg-amber-500 hover:bg-amber-600">
+        <Badge className="rounded-full bg-amber-500 uppercase hover:bg-amber-600">
           Placed
         </Badge>
       );
     case "CONFIRMED":
       return (
-        <Badge className="rounded-full bg-blue-500 hover:bg-blue-600">
+        <Badge className="rounded-full bg-blue-500 uppercase hover:bg-blue-600">
           Confirmed
         </Badge>
       );
     case "SHIPPED":
       return (
-        <Badge className="rounded-full bg-purple-500 hover:bg-purple-600">
+        <Badge className="rounded-full bg-purple-500 uppercase hover:bg-purple-600">
           Shipped
         </Badge>
       );
     case "DELIVERED":
       return (
-        <Badge className="rounded-full bg-green-500 hover:bg-green-600">
+        <Badge className="rounded-full bg-green-500 uppercase hover:bg-green-600">
           Delivered
         </Badge>
       );
     case "CANCELLED":
       return (
-        <Badge variant="destructive" className="rounded-full">
+        <Badge variant="destructive" className="rounded-full uppercase">
           Cancelled
         </Badge>
       );
     default:
       return (
-        <Badge variant="outline" className="rounded-full">
+        <Badge variant="outline" className="rounded-full uppercase">
           {status}
         </Badge>
       );
@@ -125,31 +125,31 @@ const getPaymentStatusBadge = (status: string) => {
   switch (status) {
     case "PAID":
       return (
-        <Badge className="rounded-full bg-green-500 hover:bg-green-600">
+        <Badge className="rounded-full bg-green-500 uppercase hover:bg-green-600">
           Paid
         </Badge>
       );
     case "PENDING":
       return (
-        <Badge className="rounded-full bg-amber-500 hover:bg-amber-600">
+        <Badge className="rounded-full bg-amber-500 uppercase hover:bg-amber-600">
           Pending
         </Badge>
       );
     case "FAILED":
       return (
-        <Badge variant="destructive" className="rounded-full">
+        <Badge variant="destructive" className="rounded-full uppercase">
           Failed
         </Badge>
       );
     case "CANCELLED":
       return (
-        <Badge variant="destructive" className="rounded-full">
+        <Badge variant="destructive" className="rounded-full uppercase">
           Cancelled
         </Badge>
       );
     default:
       return (
-        <Badge variant="outline" className="rounded-full">
+        <Badge variant="outline" className="rounded-full uppercase">
           {status}
         </Badge>
       );
@@ -196,7 +196,7 @@ export default function MyOrders() {
           ) : (
             <div className="space-y-6">
               {orders?.map((order: Order) => (
-                <Card key={order._id} className="overflow-hidden">
+                <Card key={order._id} className="h-fit overflow-hidden">
                   <CardHeader className="bg-muted/50 pb-4">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                       <div>

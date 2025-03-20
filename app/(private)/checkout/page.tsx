@@ -38,6 +38,7 @@ import { useCartProducts } from "@/redux/features/cart/cartSlice";
 import { useGetProfileQuery } from "@/redux/features/profile/profileApi";
 import { useCreateOrderMutation } from "@/redux/features/order/orderApi";
 import { useCreatePaymentIntentMutation } from "@/redux/features/payment/paymentApi";
+import { OverlayLoading } from "@/components/ui/overlay-loading";
 
 interface ICartProduct {
   _id: string;
@@ -77,11 +78,13 @@ export default function CheckoutPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const cartItems = useCartProducts();
-  const [getCart] = useGetCartItemsMutation();
+  const [getCart, { isLoading }] = useGetCartItemsMutation();
   const [createOrder] = useCreateOrderMutation();
   const [createPaymentIntent] = useCreatePaymentIntentMutation();
 
-  const { data: profileData } = useGetProfileQuery({});
+  const { data: profileData, isLoading: isProfileLoading } = useGetProfileQuery(
+    {},
+  );
 
   useEffect(() => {
     getCart({ cart_items: cartItems }).then(({ data }) => {
@@ -191,6 +194,7 @@ export default function CheckoutPage() {
 
   return (
     <main className="flex-1 bg-muted/30">
+      <OverlayLoading isLoading={isLoading || isProfileLoading} />
       <Container>
         <div className="mb-6">
           <Link

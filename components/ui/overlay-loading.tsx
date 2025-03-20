@@ -5,38 +5,24 @@ import { LoadingSpinner } from "./loading-spinner";
 
 interface OverlayLoadingProps {
   isLoading: boolean;
-  text?: string;
-  delay?: number;
 }
 
-export function OverlayLoading({
-  isLoading,
-  text,
-  delay = 300,
-}: OverlayLoadingProps) {
+export function OverlayLoading({ isLoading }: OverlayLoadingProps) {
   const [showLoading, setShowLoading] = useState(false);
 
   useEffect(() => {
-    let timeout: NodeJS.Timeout;
-
     if (isLoading) {
-      timeout = setTimeout(() => {
-        setShowLoading(true);
-      }, delay);
+      setShowLoading(true);
     } else {
       setShowLoading(false);
     }
-
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [isLoading, delay]);
+  }, [isLoading]);
 
   if (!showLoading) return null;
 
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-      <LoadingSpinner size="lg" text={text} />
+      <LoadingSpinner size="lg" />
     </div>
   );
 }
