@@ -4,7 +4,7 @@ import { tagTypes } from "@/redux/tagTypes";
 export const orderApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     myOrders: builder.query({
-      query: () => "/orders/me",
+      query: () => "/orders/my-orders",
       providesTags: [tagTypes.order],
     }),
 

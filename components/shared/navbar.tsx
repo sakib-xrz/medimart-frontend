@@ -213,8 +213,8 @@ export function Navbar() {
                 )}
 
                 {user.role === "CUSTOMER" && (
-                  <DropdownMenuItem className="cursor-pointer">
-                    My Orders
+                  <DropdownMenuItem className="cursor-pointer" asChild>
+                    <Link href="/my-orders">My Orders</Link>
                   </DropdownMenuItem>
                 )}
 
