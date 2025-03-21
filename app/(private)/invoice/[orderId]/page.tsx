@@ -17,6 +17,7 @@ import {
 import Container from "@/components/shared/container";
 import { useMyOrderQuery } from "@/redux/features/order/orderApi";
 import { OverlayLoading } from "@/components/ui/overlay-loading";
+import { formatDate } from "@/lib/utils";
 
 interface Product {
   product_id: string;
@@ -75,7 +76,7 @@ export default function InvoicePage({
           </div>
 
           <Card className="print:border-none print:shadow-none">
-            <CardHeader className="print:pt-0">
+            <CardHeader className="print:pt-10">
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <CardTitle className="text-2xl">Invoice</CardTitle>
@@ -115,7 +116,7 @@ export default function InvoicePage({
                     <div className="space-y-1">
                       <div className="flex justify-between sm:justify-end sm:gap-4">
                         <span className="font-medium">Invoice Date:</span>
-                        <span>{orderData.order_date}</span>
+                        <span>{formatDate(orderData.createdAt)}</span>
                       </div>
                       <div className="flex justify-between sm:justify-end sm:gap-4">
                         <span className="font-medium">Order ID:</span>
