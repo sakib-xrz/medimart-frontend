@@ -45,7 +45,7 @@ export default function AdminHeader({ onMenuClick }: AdminHeaderProps) {
           <span className="sr-only">Toggle menu</span>
         </Button>
 
-        <Link href="/" className="flex items-center gap-2 lg:hidden">
+        <Link href="/" className="flex items-center gap-2 xl:hidden">
           <Image src={Logo} alt="Medi Mart Logo" className="w-32" />
         </Link>
       </div>

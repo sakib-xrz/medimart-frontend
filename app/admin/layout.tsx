@@ -22,8 +22,8 @@ export default function AdminLayout({
   // Handle screen resize
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 1024);
-      if (window.innerWidth >= 1024) {
+      setIsMobile(window.innerWidth < 1280);
+      if (window.innerWidth >= 1280) {
         setSidebarOpen(false);
       }
     };
@@ -58,7 +58,7 @@ export default function AdminLayout({
 
       {/* Main Content */}
       <div
-        className={`flex flex-1 flex-col transition-all duration-300 ${sidebarCollapsed ? "lg:ml-20" : "lg:ml-64"}`}
+        className={`flex flex-1 flex-col transition-all duration-300 ${sidebarCollapsed ? "xl:ml-20" : "xl:ml-64"}`}
       >
         {/* Header */}
         <AdminHeader onMenuClick={toggleSidebar} isMobile={isMobile} />

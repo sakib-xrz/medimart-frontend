@@ -56,7 +56,7 @@ export default function AdminSidebar({
       {/* Desktop Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-30 hidden h-screen border-r bg-card shadow-sm transition-all duration-300 lg:flex lg:flex-col",
+          "fixed left-0 top-0 z-30 hidden h-screen border-r bg-card shadow-sm transition-all duration-300 xl:flex xl:flex-col",
           collapsed ? "w-20" : "w-64",
         )}
       >
@@ -101,7 +101,7 @@ export default function AdminSidebar({
       {/* Mobile Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-30 h-screen border-r bg-card shadow-sm transition-all duration-300 lg:hidden",
+          "fixed left-0 top-0 z-30 h-screen border-r bg-card shadow-sm transition-all duration-300 xl:hidden",
           isOpen ? "translate-x-0" : "-translate-x-full",
           "w-64",
         )}
