@@ -38,7 +38,6 @@ import {
 import {
   Area,
   CartesianGrid,
-  Line,
   XAxis,
   YAxis,
   ResponsiveContainer,
@@ -54,7 +53,7 @@ type OrderStatusType =
   | "CANCELLED";
 
 interface RevenueData {
-  name: string;
+  month: string;
   revenue: number;
 }
 
@@ -93,18 +92,18 @@ interface ChartConfig {
 
 // Sample data
 const revenueData: RevenueData[] = [
-  { name: "Jan", revenue: 18500 },
-  { name: "Feb", revenue: 21500 },
-  { name: "Mar", revenue: 19800 },
-  { name: "Apr", revenue: 22500 },
-  { name: "May", revenue: 25300 },
-  { name: "Jun", revenue: 28900 },
-  { name: "Jul", revenue: 27200 },
-  { name: "Aug", revenue: 32100 },
-  { name: "Sep", revenue: 35800 },
-  { name: "Oct", revenue: 39500 },
-  { name: "Nov", revenue: 42100 },
-  { name: "Dec", revenue: 45200 },
+  { month: "Jan", revenue: 18500 },
+  { month: "Feb", revenue: 21500 },
+  { month: "Mar", revenue: 19800 },
+  { month: "Apr", revenue: 22500 },
+  { month: "May", revenue: 25300 },
+  { month: "Jun", revenue: 28900 },
+  { month: "Jul", revenue: 27200 },
+  { month: "Aug", revenue: 32100 },
+  { month: "Sep", revenue: 35800 },
+  { month: "Oct", revenue: 39500 },
+  { month: "Nov", revenue: 42100 },
+  { month: "Dec", revenue: 45200 },
 ];
 
 const recentOrders: RecentOrder[] = [
@@ -178,25 +177,9 @@ const expiringProducts: ExpiringProduct[] = [
 
 const chartConfig: {
   revenue: ChartConfig;
-  sales: ChartConfig;
-  value: ChartConfig;
 } = {
   revenue: {
     label: "Revenue",
-    theme: {
-      light: "hsl(var(--primary))",
-      dark: "hsl(var(--primary))",
-    },
-  },
-  sales: {
-    label: "Sales",
-    theme: {
-      light: "hsl(var(--primary))",
-      dark: "hsl(var(--primary))",
-    },
-  },
-  value: {
-    label: "Value",
     theme: {
       light: "hsl(var(--primary))",
       dark: "hsl(var(--primary))",
@@ -389,8 +372,8 @@ export default function AdminDashboard(): JSX.Element {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px]">
-              <ChartContainer config={chartConfig} className="h-[300px] w-full">
+            <div className="h-[340px]">
+              <ChartContainer config={chartConfig} className="h-[340px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={revenueData}>
                     <defs>
@@ -414,7 +397,7 @@ export default function AdminDashboard(): JSX.Element {
                       </linearGradient>
                     </defs>
                     <XAxis
-                      dataKey="name"
+                      dataKey="month"
                       stroke="hsl(var(--muted-foreground))"
                       fontSize={12}
                       tickLine={false}
@@ -429,21 +412,8 @@ export default function AdminDashboard(): JSX.Element {
                     />
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
                     <ChartTooltip
-                      content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          return (
-                            <ChartTooltipContent>
-                              <div className="font-medium">
-                                Month: {payload[0].payload.name}
-                              </div>
-                              <div className="text-sm text-muted-foreground">
-                                Revenue: BDT {payload[0].value}
-                              </div>
-                            </ChartTooltipContent>
-                          );
-                        }
-                        return null;
-                      }}
+                      cursor={false}
+                      content={<ChartTooltipContent indicator="line" />}
                     />
                     <Area
                       type="monotone"
@@ -451,13 +421,6 @@ export default function AdminDashboard(): JSX.Element {
                       stroke="hsl(var(--primary))"
                       strokeWidth={2}
                       fill="url(#colorRevenue)"
-                      dot={false}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="revenue"
-                      stroke="hsl(var(--primary))"
-                      strokeWidth={2}
                       dot={false}
                     />
                   </ComposedChart>
@@ -475,7 +438,7 @@ export default function AdminDashboard(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentOrders.slice(0, 4).map((order) => (
+              {recentOrders.map((order) => (
                 <div key={order.id} className="flex items-center gap-4">
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
                     <CreditCard className="h-4 w-4 text-primary" />
