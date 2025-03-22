@@ -208,7 +208,7 @@ export function Navbar() {
                 </DropdownMenuItem>
                 {user.role === "ADMIN" && (
                   <DropdownMenuItem className="cursor-pointer">
-                    Dashboard
+                    <Link href="/admin/dashboard">Dashboard</Link>
                   </DropdownMenuItem>
                 )}
 
