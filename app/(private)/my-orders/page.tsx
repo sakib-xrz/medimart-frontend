@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  ArrowRight,
   Calendar,
   ChevronDown,
   ChevronRight,
@@ -248,12 +247,6 @@ export default function MyOrders() {
                             </>
                           )}
                         </Button>
-                        <Button variant="outline" size="sm" asChild>
-                          <Link href={`/track-order/${order.order_id}`}>
-                            <Package className="mr-1 h-4 w-4" />
-                            Track Order
-                          </Link>
-                        </Button>
                       </div>
                     </div>
 
@@ -431,13 +424,6 @@ export default function MyOrders() {
                               View Invoice
                             </Link>
                           </Button>
-
-                          {order.order_status === "DELIVERED" && (
-                            <Button size="sm">
-                              <ArrowRight className="mr-1 h-4 w-4" />
-                              Reorder
-                            </Button>
-                          )}
                         </div>
                       </div>
                     )}
