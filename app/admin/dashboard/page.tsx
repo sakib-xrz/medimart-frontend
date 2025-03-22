@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -15,10 +15,7 @@ import {
   DollarSign,
   Package,
   ShoppingCart,
-  TrendingUp,
   Users,
-  Clock,
-  AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -36,21 +33,16 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  ChartLegend,
-  ChartLegendContent,
 } from "@/components/ui/chart";
 
 import {
   Area,
   CartesianGrid,
-  Cell,
   Line,
-  Pie,
   XAxis,
   YAxis,
   ResponsiveContainer,
   ComposedChart,
-  PieChart as RechartsPieChart,
 } from "recharts";
 
 // Define types for the data
@@ -73,12 +65,6 @@ interface RecentOrder {
   total: number;
   status: OrderStatusType;
   items: number;
-}
-
-interface OrderStatusChartData {
-  name: string;
-  value: number;
-  color: string;
 }
 
 interface LowStockProduct {
@@ -162,13 +148,6 @@ const recentOrders: RecentOrder[] = [
     status: "CANCELLED",
     items: 4,
   },
-];
-
-const orderStatusData: OrderStatusChartData[] = [
-  { name: "Delivered", value: 65, color: "#10b981" },
-  { name: "Processing", value: 15, color: "#f59e0b" },
-  { name: "Shipped", value: 12, color: "#3b82f6" },
-  { name: "Cancelled", value: 8, color: "#ef4444" },
 ];
 
 const lowStockProducts: LowStockProduct[] = [
@@ -268,17 +247,40 @@ const getOrderStatusBadge = (status: OrderStatusType): JSX.Element => {
 };
 
 export default function AdminDashboard(): JSX.Element {
-  // if the screen size is less than 1024 then show that this page is only available on desktop
+  const [isMobile, setIsMobile] = useState(false);
 
-  if (window.innerWidth < 1024) {
+  useEffect(() => {
+    // Check if window is defined (client-side)
+    if (typeof window !== "undefined") {
+      // Initial check
+      setIsMobile(window.innerWidth < 1024);
+
+      // Add resize listener
+      const handleResize = () => {
+        setIsMobile(window.innerWidth < 1024);
+      };
+
+      window.addEventListener("resize", handleResize);
+
+      // Clean up
+      return () => window.removeEventListener("resize", handleResize);
+    }
+  }, []);
+
+  if (isMobile) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold">Desktop Only</h1>
-          <p className="text-muted-foreground">
-            This page is only available on desktop
-          </p>
-        </div>
+      <div className="flex h-[calc(100svh-100px)] flex-col items-center justify-center bg-muted/10 px-4 text-center">
+        <Package className="mx-auto mb-4 h-12 w-12 text-primary" />
+        <h1 className="mb-2 text-3xl font-bold tracking-tight">
+          Admin Dashboard
+        </h1>
+        <p className="mb-6 text-muted-foreground">
+          The admin dashboard is optimized for larger screens. Please access it
+          from a desktop device.
+        </p>
+        <Button asChild variant="outline">
+          <a href="/">Return to Home</a>
+        </Button>
       </div>
     );
   }
@@ -374,8 +376,8 @@ export default function AdminDashboard(): JSX.Element {
       </div>
 
       {/* Revenue Chart */}
-      <div className="w-full">
-        <Card>
+      <div className="grid w-full grid-cols-12 gap-4">
+        <Card className="col-span-7">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
@@ -383,12 +385,6 @@ export default function AdminDashboard(): JSX.Element {
                 <CardDescription>
                   Monthly revenue for the current year
                 </CardDescription>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="flex items-center gap-1">
-                  <TrendingUp className="h-3 w-3" />
-                  <span>+12.5%</span>
-                </Badge>
               </div>
             </div>
           </CardHeader>
@@ -470,11 +466,7 @@ export default function AdminDashboard(): JSX.Element {
             </div>
           </CardContent>
         </Card>
-      </div>
-
-      {/* Recent Orders and Order Status */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <Card>
+        <Card className="col-span-5">
           <CardHeader>
             <CardTitle>Recent Orders</CardTitle>
             <CardDescription>
@@ -517,70 +509,6 @@ export default function AdminDashboard(): JSX.Element {
             </div>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Order Status</CardTitle>
-            <CardDescription>Distribution of orders by status</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[270px]">
-              <ChartContainer config={chartConfig} className="h-[270px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RechartsPieChart>
-                    <Pie
-                      data={orderStatusData}
-                      dataKey="value"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={0}
-                      outerRadius={80}
-                      paddingAngle={2}
-                      label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
-                      labelLine={false}
-                    >
-                      {orderStatusData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <ChartTooltip
-                      content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          return (
-                            <ChartTooltipContent>
-                              <div className="font-medium">
-                                {payload[0].name}
-                              </div>
-                              <div className="text-sm text-muted-foreground">
-                                {payload[0].value}% of orders
-                              </div>
-                            </ChartTooltipContent>
-                          );
-                        }
-                        return null;
-                      }}
-                    />
-                    <ChartLegend
-                      verticalAlign="bottom"
-                      content={({ payload }) => {
-                        if (payload && payload.length) {
-                          return (
-                            <ChartLegendContent
-                              payload={payload}
-                              verticalAlign="bottom"
-                            />
-                          );
-                        }
-                        return null;
-                      }}
-                    />
-                  </RechartsPieChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Inventory Alerts */}
@@ -594,27 +522,34 @@ export default function AdminDashboard(): JSX.Element {
                 Products that need to be restocked
               </CardDescription>
             </div>
-            <AlertTriangle className="h-5 w-5 text-amber-500" />
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
               <Table className="min-w-full">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Product ID</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead className="text-right">Stock</TableHead>
-                    <TableHead className="text-right">Action</TableHead>
+                    <TableHead className="whitespace-nowrap">
+                      Product ID
+                    </TableHead>
+                    <TableHead className="whitespace-nowrap">Name</TableHead>
+                    <TableHead className="whitespace-nowrap text-center">
+                      Stock
+                    </TableHead>
+                    <TableHead className="whitespace-nowrap text-right">
+                      Action
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {lowStockProducts.map((product) => (
                     <TableRow key={product.id}>
-                      <TableCell className="font-medium">
+                      <TableCell className="whitespace-nowrap font-medium">
                         {product.id}
                       </TableCell>
-                      <TableCell>{product.name}</TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="whitespace-nowrap">
+                        {product.name}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap text-center">
                         <Badge
                           variant="outline"
                           className="border-amber-200 bg-amber-50 text-amber-700"
@@ -622,7 +557,7 @@ export default function AdminDashboard(): JSX.Element {
                           {product.stock} left
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="whitespace-nowrap text-right">
                         <Button size="sm" variant="outline">
                           Restock
                         </Button>
@@ -644,27 +579,34 @@ export default function AdminDashboard(): JSX.Element {
                 Products expiring within 30 days
               </CardDescription>
             </div>
-            <Clock className="h-5 w-5 text-red-500" />
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
               <Table className="min-w-full">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Product ID</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Expiry Date</TableHead>
-                    <TableHead className="text-right">Action</TableHead>
+                    <TableHead className="whitespace-nowrap">
+                      Product ID
+                    </TableHead>
+                    <TableHead className="whitespace-nowrap">Name</TableHead>
+                    <TableHead className="whitespace-nowrap text-center">
+                      Expiry Date
+                    </TableHead>
+                    <TableHead className="whitespace-nowrap text-right">
+                      Action
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {expiringProducts.map((product) => (
                     <TableRow key={product.id}>
-                      <TableCell className="font-medium">
+                      <TableCell className="whitespace-nowrap font-medium">
                         {product.id}
                       </TableCell>
-                      <TableCell>{product.name}</TableCell>
-                      <TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        {product.name}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap text-center">
                         <Badge
                           variant="outline"
                           className="border-red-200 bg-red-50 text-red-700"
@@ -672,7 +614,7 @@ export default function AdminDashboard(): JSX.Element {
                           {new Date(product.expiryDate).toLocaleDateString()}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="whitespace-nowrap text-right">
                         <Button size="sm" variant="outline">
                           Manage
                         </Button>
