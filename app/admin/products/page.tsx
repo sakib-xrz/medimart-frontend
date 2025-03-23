@@ -2,7 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Edit, Eye, MoreHorizontal, Plus, Search, Trash } from "lucide-react";
+import {
+  Edit,
+  MoreHorizontal,
+  Plus,
+  Search,
+  Trash,
+  Package,
+  Loader2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -30,22 +38,48 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useGetProductsQuery } from "@/redux/features/product/productApi";
-import { IProduct } from "@/app/(public)/_components/products-section";
+import type { IProduct } from "@/app/(public)/_components/products-section";
 import { categories } from "@/lib/constant";
 import { formatExpiryDate } from "@/lib/utils";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
 
 export default function ProductsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const { data: productsData } = useGetProductsQuery({});
-
+  const { data: productsData, isLoading } = useGetProductsQuery({});
   const products = productsData?.data || [];
 
   // Check if product is expired
-  const isExpired = (expiryDate: string) => {
-    return new Date(expiryDate) < new Date();
+  const isExpired = (expiryDate: string) => new Date(expiryDate) < new Date();
+
+  // Calculate discounted price
+  const calculateDiscountedPrice = (product: IProduct) => {
+    if (product.discount > 0) {
+      if (product.discount_type === "PERCENTAGE") {
+        return product.price - (product.price * product.discount) / 100;
+      } else {
+        return product.price - product.discount;
+      }
+    }
+    return product.price;
+  };
+
+  // Render product status badge
+  const renderStatusBadge = (product: IProduct) => {
+    if (isExpired(product.expiry_date)) {
+      return <Badge variant="destructive">Expired</Badge>;
+    } else if (!product.in_stock) {
+      return <Badge variant="destructive">Out of Stock</Badge>;
+    } else {
+      return <Badge variant="default">In Stock</Badge>;
+    }
   };
 
   // Filter products based on search query, category, and status
@@ -66,8 +100,59 @@ export default function ProductsPage() {
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
+  // New state components for consistency
+  const LoadingState = () => (
+    <div className="flex flex-col items-center justify-center py-12">
+      <Loader2 className="mb-4 h-12 w-12 animate-spin text-primary" />
+      <p className="text-lg text-muted-foreground">Loading products...</p>
+    </div>
+  );
+
+  const EmptyState = () => (
+    <div className="flex flex-col items-center justify-center py-12">
+      <Package className="mb-4 h-12 w-12 text-muted-foreground" />
+      <h3 className="mb-1 text-lg font-medium">No products yet</h3>
+      <p className="text-muted-foreground">
+        You haven&apos;t added any products to your inventory yet.
+      </p>
+      <Link href="/admin/products/create">
+        <Button className="mt-6">
+          <Plus className="h-4 w-4" />
+          Add Your First Product
+        </Button>
+      </Link>
+    </div>
+  );
+
+  const EmptySearchState = () => (
+    <div className="flex flex-col items-center justify-center py-12">
+      <Search className="mb-4 h-12 w-12 text-muted-foreground" />
+      <h3 className="mb-1 text-lg font-medium">No results found</h3>
+      <p className="mb-4 text-muted-foreground">
+        No products match your search criteria.
+      </p>
+      <Button
+        variant="outline"
+        onClick={() => {
+          setSearchQuery("");
+          setCategoryFilter("all");
+          setStatusFilter("all");
+        }}
+      >
+        Clear Search
+      </Button>
+    </div>
+  );
+
+  // Check if any filters are active (search query or non-default filters)
+  const isFilterActive =
+    searchQuery.length > 0 ||
+    categoryFilter !== "all" ||
+    statusFilter !== "all";
+
   return (
     <div className="space-y-6">
+      {/* Header & Filter/Search Panel */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Products</h1>
@@ -122,92 +207,31 @@ export default function ProductsPage() {
         </div>
       </div>
 
-      <div className="rounded-md border bg-white">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px]">ID</TableHead>
-              <TableHead>Product</TableHead>
-              <TableHead className="hidden md:table-cell">Category</TableHead>
-              <TableHead className="hidden text-center md:table-cell">
-                Price
-              </TableHead>
-              <TableHead className="text-center">Status</TableHead>
-              <TableHead className="hidden md:table-cell">Expiry</TableHead>
-              <TableHead className="hidden text-center md:table-cell">
-                Stock
-              </TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+      {/* Conditional rendering for products list */}
+      {isLoading ? (
+        <LoadingState />
+      ) : products.length === 0 ? (
+        <EmptyState />
+      ) : filteredProducts.length === 0 && isFilterActive ? (
+        <EmptySearchState />
+      ) : (
+        <>
+          {/* Card view for smaller screens */}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:hidden">
             {filteredProducts.map((product: IProduct) => (
-              <TableRow key={product._id}>
-                <TableCell className="whitespace-nowrap font-medium uppercase">
-                  {product.slug}
-                </TableCell>
-                <TableCell className="max-w-[150px]">
+              <Card key={product._id} className="overflow-hidden">
+                <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
                   <div>
-                    <div className="line-clamp-1 font-medium">
+                    <h3 className="line-clamp-1 font-semibold">
                       {product.name}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {product.form} • {product.dosage}
-                    </div>
-                    {product.requires_prescription && (
-                      <Badge variant="outline" className="mt-1">
-                        Prescription Required
-                      </Badge>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell className="hidden md:table-cell">
-                  {product.category}
-                </TableCell>
-                <TableCell className="hidden text-center md:table-cell">
-                  <p>
-                    BDT{" "}
-                    {(product.discount > 0
-                      ? product.discount_type === "PERCENTAGE"
-                        ? product.price -
-                          (product.price * product.discount) / 100
-                        : product.price - product.discount
-                      : product.price
-                    ).toLocaleString()}
-                  </p>
-                  {product.discount > 0 && (
-                    <p className="ml-1 mt-1 border-green-400 text-green-600">
-                      {product.discount_type === "PERCENTAGE"
-                        ? `${product.discount}% Off`
-                        : `BDT ${product.discount} Off`}
+                    </h3>
+                    <p className="text-xs uppercase text-muted-foreground">
+                      {product.slug}
                     </p>
-                  )}
-                </TableCell>
-                <TableCell className="text-center">
-                  {isExpired(product.expiry_date) ? (
-                    <Badge variant="destructive">Expired</Badge>
-                  ) : !product.in_stock ? (
-                    <Badge variant="destructive">Out of Stock</Badge>
-                  ) : (
-                    <Badge variant="default">In Stock</Badge>
-                  )}
-                </TableCell>
-                <TableCell className="hidden md:table-cell">
-                  <span
-                    className={
-                      isExpired(product.expiry_date) ? "text-red-600" : ""
-                    }
-                  >
-                    {formatExpiryDate(product.expiry_date)}
-                  </span>
-                </TableCell>
-                <TableCell className="hidden text-center md:table-cell">
-                  {product.stock}
-                </TableCell>
-                <TableCell className="text-right">
+                  </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" className="-mt-1">
                         <MoreHorizontal className="h-4 w-4" />
                         <span className="sr-only">Open menu</span>
                       </Button>
@@ -220,14 +244,6 @@ export default function ProductsPage() {
                           Edit Product
                         </DropdownMenuItem>
                       </Link>
-                      <Link
-                        href={`/products/${product.category_slug}/${product.slug}`}
-                      >
-                        <DropdownMenuItem>
-                          <Eye className="h-4 w-4" />
-                          View Details
-                        </DropdownMenuItem>
-                      </Link>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem className="text-red-600">
                         <Trash className="h-4 w-4" />
@@ -235,19 +251,184 @@ export default function ProductsPage() {
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                </TableCell>
-              </TableRow>
+                </CardHeader>
+                <CardContent className="pb-2">
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex items-center text-sm">
+                      <span className="text-muted-foreground">Category:</span>
+                      <span className="ml-2 font-medium">
+                        {product.category}
+                      </span>
+                    </div>
+                    <div className="flex items-center text-sm">
+                      <span className="text-muted-foreground">Form:</span>
+                      <span className="ml-2 font-medium">
+                        {product.form} • {product.dosage}
+                      </span>
+                    </div>
+                    <div className="flex items-center text-sm">
+                      <span className="text-muted-foreground">Expiry:</span>
+                      <span
+                        className={`ml-2 font-medium ${
+                          isExpired(product.expiry_date) ? "text-red-600" : ""
+                        }`}
+                      >
+                        {formatExpiryDate(product.expiry_date)}
+                      </span>
+                    </div>
+                    <div className="flex items-center text-sm">
+                      <span className="text-muted-foreground">Stock:</span>
+                      <span className="ml-2 font-medium">
+                        {product.stock} units
+                      </span>
+                    </div>
+                    <div className="flex items-center text-sm">
+                      <span className="text-muted-foreground">Price:</span>
+                      <span className="ml-2 font-medium">
+                        BDT {calculateDiscountedPrice(product).toLocaleString()}
+                        {product.discount > 0 && (
+                          <span className="ml-1 text-green-600">
+                            (
+                            {product.discount_type === "PERCENTAGE"
+                              ? `${product.discount}% off`
+                              : `BDT ${product.discount} off`}
+                            )
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex items-center justify-between pt-2">
+                  <div>
+                    {renderStatusBadge(product)}
+                    {product.requires_prescription && (
+                      <Badge variant="outline" className="ml-2">
+                        Prescription
+                      </Badge>
+                    )}
+                  </div>
+                </CardFooter>
+              </Card>
             ))}
-            {filteredProducts.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={8} className="h-24 text-center">
-                  No products found.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+          </div>
+
+          {/* Table view for larger screens */}
+          <div className="hidden rounded-md border bg-white lg:block">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[100px]">ID</TableHead>
+                  <TableHead>Product</TableHead>
+                  <TableHead className="hidden md:table-cell">
+                    Category
+                  </TableHead>
+                  <TableHead className="hidden text-center md:table-cell">
+                    Price
+                  </TableHead>
+                  <TableHead className="hidden text-center md:table-cell">
+                    Prescription Required
+                  </TableHead>
+                  <TableHead className="text-center">Status</TableHead>
+                  <TableHead className="hidden md:table-cell">Expiry</TableHead>
+                  <TableHead className="hidden text-center md:table-cell">
+                    Stock
+                  </TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredProducts.map((product: IProduct) => (
+                  <TableRow key={product._id}>
+                    <TableCell className="whitespace-nowrap font-medium uppercase">
+                      {product.slug}
+                    </TableCell>
+                    <TableCell className="max-w-[150px]">
+                      <div>
+                        <div className="line-clamp-1 font-medium">
+                          {product.name}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {product.form} • {product.dosage}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      {product.category}
+                    </TableCell>
+                    <TableCell className="hidden text-center md:table-cell">
+                      <p>
+                        BDT {calculateDiscountedPrice(product).toLocaleString()}
+                      </p>
+                      {product.discount > 0 && (
+                        <p className="ml-1 mt-1 border-green-400 text-green-600">
+                          {product.discount_type === "PERCENTAGE"
+                            ? `${product.discount}% Off`
+                            : `BDT ${product.discount} Off`}
+                        </p>
+                      )}
+                    </TableCell>
+                    <TableCell className="hidden text-center uppercase md:table-cell">
+                      {
+                        <Badge
+                          variant={
+                            product.requires_prescription
+                              ? "default"
+                              : "outline"
+                          }
+                        >
+                          {product.requires_prescription
+                            ? "Required"
+                            : "Not Required"}
+                        </Badge>
+                      }
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {renderStatusBadge(product)}
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <span
+                        className={
+                          isExpired(product.expiry_date) ? "text-red-600" : ""
+                        }
+                      >
+                        {formatExpiryDate(product.expiry_date)}
+                      </span>
+                    </TableCell>
+                    <TableCell className="hidden text-center md:table-cell">
+                      {product.stock}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Open menu</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-40">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <Link href={`/admin/products/${product._id}/edit`}>
+                            <DropdownMenuItem>
+                              <Edit className="h-4 w-4" />
+                              Edit Product
+                            </DropdownMenuItem>
+                          </Link>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-red-600">
+                            <Trash className="h-4 w-4" />
+                            Delete Product
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </>
+      )}
     </div>
   );
 }
