@@ -1,5 +1,7 @@
 "use client";
 
+import type React from "react";
+
 import { useEffect, useState } from "react";
 import {
   ClipboardList,
@@ -224,23 +226,87 @@ export default function CustomersPage() {
         <EmptySearchState />
       ) : (
         <>
-          <div className="rounded-md border bg-white">
+          {/* Card view for medium devices */}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:hidden">
+            {customers.map((customer: Customer) => (
+              <div
+                key={customer._id}
+                className="rounded-lg border bg-white p-4 shadow-sm"
+              >
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className="font-medium">{customer.name}</h3>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <MoreHorizontal className="h-4 w-4" />
+                        <span className="sr-only">Open menu</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-44">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuItem className="cursor-pointer">
+                        <ClipboardList className="mr-1 h-4 w-4" />
+                        View Orders
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="cursor-pointer focus:bg-destructive focus:text-destructive-foreground">
+                        <Trash className="mr-1 h-4 w-4" />
+                        Delete Customer
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
+                <div className="text-sm text-muted-foreground">
+                  {customer.email}
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <div className="rounded-md bg-muted p-2 text-center">
+                    <div className="text-xs text-muted-foreground">Orders</div>
+                    <div className="font-medium">{customer.total_orders}</div>
+                  </div>
+                  <div className="rounded-md bg-muted p-2 text-center">
+                    <div className="text-xs text-muted-foreground">
+                      Total Spent
+                    </div>
+                    <div className="font-medium">
+                      BDT {customer.total_spent.toLocaleString()}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 flex items-center justify-between">
+                  <div className="text-xs text-muted-foreground">
+                    Joined: {new Date(customer.createdAt).toLocaleDateString()}
+                  </div>
+                  <Select
+                    defaultValue={customer.status}
+                    // onValueChange={(value) => handleStatusChange(customer._id, value)}
+                  >
+                    <SelectTrigger className="w-[120px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ACTIVE">Active</SelectItem>
+                      <SelectItem value="BLOCKED">Blocked</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Table view for large devices */}
+          <div className="hidden rounded-md border bg-white lg:block">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Customer</TableHead>
-                  <TableHead className="hidden text-center md:table-cell">
-                    Orders
-                  </TableHead>
-                  <TableHead className="hidden text-center md:table-cell">
-                    Total Spent
-                  </TableHead>
-                  <TableHead className="hidden text-center md:table-cell">
-                    Joined
-                  </TableHead>
-                  <TableHead className="hidden text-center sm:table-cell">
-                    Change Status
-                  </TableHead>
+                  <TableHead className="text-center">Orders</TableHead>
+                  <TableHead className="text-center">Total Spent</TableHead>
+                  <TableHead className="text-center">Joined</TableHead>
+                  <TableHead className="text-center">Change Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -255,21 +321,19 @@ export default function CustomersPage() {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="hidden text-center md:table-cell">
+                    <TableCell className="text-center">
                       {customer.total_orders}
                     </TableCell>
-                    <TableCell className="hidden text-center md:table-cell">
+                    <TableCell className="text-center">
                       BDT {customer.total_spent.toLocaleString()}
                     </TableCell>
-                    <TableCell className="hidden text-center md:table-cell">
+                    <TableCell className="text-center">
                       {new Date(customer.createdAt).toLocaleDateString()}
                     </TableCell>
-                    <TableCell className="hidden text-center sm:table-cell">
+                    <TableCell className="text-center">
                       <Select
                         defaultValue={customer.status}
-                        // onValueChange={(value) =>
-                        //   handleStatusChange(customer._id, value)
-                        // }
+                        // onValueChange={(value) => handleStatusChange(customer._id, value)}
                       >
                         <SelectTrigger className="mx-auto w-[120px]">
                           <SelectValue />
