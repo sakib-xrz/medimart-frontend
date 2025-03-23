@@ -99,7 +99,7 @@ export default function CustomersPage() {
     debouncedSearch(value);
   };
 
-  const handleStatusChange = (customerId: string, newStatus: string) => {};
+  // const handleStatusChange = (customerId: string, newStatus: string) => {};
 
   const { data: customersData, isLoading: isCustomersLoading } =
     useGetCustomerQuery(sanitizeParams(modifyParams));
@@ -267,9 +267,9 @@ export default function CustomersPage() {
                     <TableCell className="hidden text-center sm:table-cell">
                       <Select
                         defaultValue={customer.status}
-                        onValueChange={(value) =>
-                          handleStatusChange(customer._id, value)
-                        }
+                        // onValueChange={(value) =>
+                        //   handleStatusChange(customer._id, value)
+                        // }
                       >
                         <SelectTrigger className="mx-auto w-[120px]">
                           <SelectValue />
