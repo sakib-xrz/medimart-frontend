@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Edit,
@@ -15,6 +15,7 @@ import {
   Calendar,
   PackageX,
   PackageCheck,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,21 +46,82 @@ import {
 import { useGetProductsQuery } from "@/redux/features/product/productApi";
 import type { IProduct } from "@/app/(public)/_components/products-section";
 import { categories } from "@/lib/constant";
-import { formatExpiryDate } from "@/lib/utils";
+import {
+  formatExpiryDate,
+  generateQueryString,
+  sanitizeParams,
+} from "@/lib/utils";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useDebouncedCallback } from "use-debounce";
+import CustomPagination from "@/app/(public)/_components/custom-pagination";
 
 export default function ProductsPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [searchKey, setSearchKey] = useState(searchParams.get("search") || "");
 
-  const { data: productsData, isLoading } = useGetProductsQuery({});
+  const [params, setParams] = useState({
+    search: searchParams.get("search") || "",
+    in_stock: searchParams.get("in_stock") || "all",
+    category_slug: searchParams.get("category_slug") || "all",
+    page: Number(searchParams.get("page")) || 1,
+    limit: Number(searchParams.get("limit")) || 20,
+  });
+
+  const debouncedSearch = useDebouncedCallback((value) => {
+    setParams((prev) => ({ ...prev, search: value, page: 1 }));
+  }, 400);
+
+  const modifyParams = {
+    ...params,
+    in_stock: params.in_stock === "all" ? "" : params.in_stock,
+    category_slug: params.category_slug === "all" ? "" : params.category_slug,
+  };
+
+  const updateURL = () => {
+    const queryString = generateQueryString(modifyParams);
+    router.push(
+      decodeURIComponent(`/admin/products${queryString}`),
+      undefined,
+      // @ts-expect-error - Fix this later
+      {
+        shallow: true,
+      },
+    );
+  };
+
+  const debouncedUpdateURL = useDebouncedCallback(updateURL, 500);
+
+  useEffect(() => {
+    debouncedUpdateURL();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    setSearchKey(value);
+    debouncedSearch(value);
+  };
+
+  const { data: productsData, isLoading } = useGetProductsQuery(
+    sanitizeParams(modifyParams),
+  );
   const products = productsData?.data || [];
+  const meta = productsData?.meta || {};
+
+  const totalPages = Math.ceil(meta.total / meta.limit);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setParams((prev) => ({ ...prev, page }));
+    }
+  };
 
   // Check if product is expired
   const isExpired = (expiryDate: string) => new Date(expiryDate) < new Date();
@@ -108,24 +170,6 @@ export default function ProductsPage() {
     };
   };
 
-  // Filter products based on search query, category, and status
-  const filteredProducts = products.filter((product: IProduct) => {
-    const matchesSearch =
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product._id.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesCategory =
-      categoryFilter === "all" || product.category === categoryFilter;
-
-    const matchesStatus =
-      statusFilter === "all" ||
-      (statusFilter === "in-stock" && product.in_stock) ||
-      (statusFilter === "out-of-stock" && !product.in_stock) ||
-      (statusFilter === "expired" && isExpired(product.expiry_date));
-
-    return matchesSearch && matchesCategory && matchesStatus;
-  });
-
   // New state components for consistency
   const LoadingState = () => (
     <div className="flex flex-col items-center justify-center py-12">
@@ -160,21 +204,18 @@ export default function ProductsPage() {
       <Button
         variant="outline"
         onClick={() => {
-          setSearchQuery("");
-          setCategoryFilter("all");
-          setStatusFilter("all");
+          setSearchKey("");
+          setParams((prevParams) => ({
+            ...prevParams,
+            search: "",
+            page: 1,
+          }));
         }}
       >
         Clear Search
       </Button>
     </div>
   );
-
-  // Check if any filters are active (search query or non-default filters)
-  const isFilterActive =
-    searchQuery.length > 0 ||
-    categoryFilter !== "all" ||
-    statusFilter !== "all";
 
   return (
     <div className="space-y-6">
@@ -198,15 +239,35 @@ export default function ProductsPage() {
         <div className="relative w-full sm:max-w-xs">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            type="search"
-            placeholder="Search products..."
+            placeholder="Search customers..."
             className="w-full pl-8"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={searchKey}
+            onChange={handleSearchChange}
           />
+          {searchKey && (
+            <button
+              className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
+              onClick={() => {
+                setSearchKey("");
+                setParams((prevParams) => ({
+                  ...prevParams,
+                  search: "",
+                  page: 1,
+                }));
+              }}
+              aria-label="Clear search"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
         </div>
         <div className="flex w-full flex-col items-center gap-2 sm:w-auto sm:flex-row">
-          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+          <Select
+            value={params.category_slug}
+            onValueChange={(value) =>
+              setParams((prev) => ({ ...prev, category_slug: value, page: 1 }))
+            }
+          >
             <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Filter by category" />
             </SelectTrigger>
@@ -219,15 +280,19 @@ export default function ProductsPage() {
               ))}
             </SelectContent>
           </Select>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select
+            value={params.in_stock}
+            onValueChange={(value) =>
+              setParams((prev) => ({ ...prev, in_stock: value, page: 1 }))
+            }
+          >
             <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="Filter by status" />
+              <SelectValue placeholder="Filter by availability" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="in-stock">In Stock</SelectItem>
-              <SelectItem value="out-of-stock">Out of Stock</SelectItem>
-              <SelectItem value="expired">Expired</SelectItem>
+              <SelectItem value="all">All Products</SelectItem>
+              <SelectItem value="true">In Stock</SelectItem>
+              <SelectItem value="false">Out of Stock</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -236,15 +301,15 @@ export default function ProductsPage() {
       {/* Conditional rendering for products list */}
       {isLoading ? (
         <LoadingState />
-      ) : products.length === 0 ? (
+      ) : products.length === 0 && !params.search.length ? (
         <EmptyState />
-      ) : filteredProducts.length === 0 && isFilterActive ? (
+      ) : products.length === 0 && params.search.length ? (
         <EmptySearchState />
       ) : (
         <>
           {/* Card view for smaller screens */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:hidden">
-            {filteredProducts.map((product: IProduct) => {
+            {products.map((product: IProduct) => {
               const status = getProductStatus(product);
               const discountedPrice = calculateDiscountedPrice(product);
               const hasDiscount = product.discount > 0;
@@ -400,7 +465,7 @@ export default function ProductsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredProducts.map((product: IProduct) => (
+                {products.map((product: IProduct) => (
                   <TableRow key={product._id}>
                     <TableCell className="whitespace-nowrap font-medium uppercase">
                       {product.slug}
@@ -489,6 +554,12 @@ export default function ProductsPage() {
               </TableBody>
             </Table>
           </div>
+
+          <CustomPagination
+            params={params}
+            totalPages={totalPages}
+            handlePageChange={handlePageChange}
+          />
         </>
       )}
     </div>
