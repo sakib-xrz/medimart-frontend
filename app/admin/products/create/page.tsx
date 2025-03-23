@@ -1,27 +1,17 @@
 "use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import {
-  ArrowLeft,
-  Calendar,
-  Info,
-  Pill,
-  Tag,
-  DollarSign,
-  Percent,
-  ClipboardList,
-  FileText,
-  CheckCircle2,
-  AlertCircle,
-} from "lucide-react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { ArrowLeft, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -29,155 +19,80 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import Link from "next/link";
 
-// Categories for the dropdown
+// Mock categories for the form
 const categories = [
-  { name: "Women's Health", slug: "womens-health" },
-  { name: "Pain Relief", slug: "pain-relief" },
-  { name: "Antibiotics", slug: "antibiotics" },
-  { name: "Vitamins", slug: "vitamins" },
-  { name: "Medical Devices", slug: "medical-devices" },
-  { name: "Diabetes", slug: "diabetes" },
+  { id: "1", name: "Pain Relief", slug: "pain-relief" },
+  { id: "2", name: "Cold & Flu", slug: "cold-and-flu" },
+  { id: "3", name: "Digestive Health", slug: "digestive-health" },
+  { id: "4", name: "Vitamins & Supplements", slug: "vitamins-and-supplements" },
+  { id: "5", name: "Women's Health", slug: "womens-health" },
+  { id: "6", name: "Men's Health", slug: "mens-health" },
+  { id: "7", name: "Skin Care", slug: "skin-care" },
 ];
 
-// Product forms
-const productForms = [
-  "Tablet",
-  "Capsule",
-  "Syrup",
-  "Injection",
-  "Cream",
-  "Ointment",
-  "Gel",
-  "Spray",
-  "Drops",
-  "Powder",
-  "Inhaler",
-  "Patch",
-  "Suppository",
-  "Solution",
-  "Suspension",
-  "Device",
-  "Kit",
-  "Other",
-];
-
-// Validation schema using Yup
+// Form validation schema
 const validationSchema = Yup.object({
   name: Yup.string().required("Product name is required"),
   category: Yup.string().required("Category is required"),
-  form: Yup.string().required("Product form is required"),
-  dosage: Yup.string(),
-  description: Yup.string(),
-  requiresPrescription: Yup.boolean(),
+  description: Yup.string().required("Description is required"),
+  form: Yup.string().required("Form is required"),
+  dosage: Yup.string().required("Dosage is required"),
   price: Yup.number()
     .required("Price is required")
     .positive("Price must be positive")
     .typeError("Price must be a number"),
-  discount: Yup.number()
-    .min(0, "Discount cannot be negative")
-    .typeError("Discount must be a number"),
-  discountType: Yup.string().oneOf(["PERCENTAGE", "FLAT"]),
   stock: Yup.number()
-    .required("Stock quantity is required")
-    .min(0, "Stock cannot be negative")
+    .required("Stock is required")
     .integer("Stock must be a whole number")
+    .min(0, "Stock cannot be negative")
     .typeError("Stock must be a number"),
-  inStock: Yup.boolean(),
   expiryDate: Yup.date()
     .required("Expiry date is required")
     .min(new Date(), "Expiry date cannot be in the past")
-    .typeError("Invalid date"),
+    .typeError("Invalid date format"),
+  discount: Yup.number()
+    .min(0, "Discount cannot be negative")
+    .typeError("Discount must be a number"),
 });
 
 export default function CreateProductPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
 
-  // Initialize formik
   const formik = useFormik({
     initialValues: {
       name: "",
       category: "",
-      categorySlug: "",
+      description: "",
       form: "",
       dosage: "",
-      description: "",
-      requiresPrescription: false,
       price: "",
+      stock: "",
+      expiryDate: "",
       discount: "0",
       discountType: "PERCENTAGE",
-      stock: "0",
+      requiresPrescription: false,
       inStock: true,
-      expiryDate: new Date(),
     },
     validationSchema,
     onSubmit: async (values) => {
       setIsSubmitting(true);
-      setFormError(null);
 
-      try {
-        // In a real app, you would send this data to your API
-        console.log("Submitting product data:", values);
+      // Simulate API call
+      console.log("Submitting product:", values);
 
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Simulate delay
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
-        // Redirect to products page after successful creation
-        router.push("/admin/products");
-      } catch (error) {
-        console.error("Error creating product:", error);
-        setFormError("Failed to create product. Please try again.");
-      } finally {
-        setIsSubmitting(false);
-      }
+      // Redirect to products page after successful creation
+      router.push("/admin/products");
     },
   });
 
-  // Handle category change to update categorySlug
-  const handleCategoryChange = (value: string) => {
-    formik.setFieldValue("category", value);
-
-    const selectedCategory = categories.find((cat) => cat.name === value);
-    if (selectedCategory) {
-      formik.setFieldValue("categorySlug", selectedCategory.slug);
-    }
-  };
-
-  // Handle date change
-  const handleDateChange = (date: Date | undefined) => {
-    if (date) {
-      formik.setFieldValue("expiryDate", date);
-    }
-  };
-
-  // Calculate discounted price for preview
+  // Calculate discounted price
   const calculateDiscountedPrice = () => {
     const price = Number.parseFloat(formik.values.price) || 0;
     const discount = Number.parseFloat(formik.values.discount) || 0;
@@ -185,69 +100,52 @@ export default function CreateProductPage() {
     if (discount <= 0) return price;
 
     if (formik.values.discountType === "PERCENTAGE") {
-      return price - price * (discount / 100);
+      return price - (price * discount) / 100;
     } else {
-      return Math.max(0, price - discount);
+      return price - discount;
     }
   };
 
+  const discountedPrice = calculateDiscountedPrice();
+  const hasDiscount =
+    Number.parseFloat(formik.values.discount) > 0 &&
+    discountedPrice < Number.parseFloat(formik.values.price || "0");
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Create Product</h1>
           <p className="text-muted-foreground">
-            Add a new product to your inventory
+            Fill in the details to create a new product
           </p>
         </div>
-        <Link href="/admin/products">
-          <Button variant="outline">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Products
+        <div className="flex items-center gap-2">
+          <Button variant="link" asChild className="hover:no-underline">
+            <Link href="/admin/products">
+              <ArrowLeft size={16} />
+              Back to Products
+            </Link>
           </Button>
-        </Link>
+        </div>
       </div>
 
-      {formError && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{formError}</AlertDescription>
-        </Alert>
-      )}
-
-      <form onSubmit={formik.handleSubmit} className="space-y-8">
+      <form onSubmit={formik.handleSubmit} className="space-y-6">
         {/* Basic Information */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <FileText className="mr-2 h-5 w-5 text-primary" />
-              Basic Product Information
-            </CardTitle>
-            <CardDescription>
-              Enter the essential details about your product
-            </CardDescription>
+            <CardTitle>Product Information</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2">
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="name" className="flex items-center">
-                  Product Name <span className="ml-1 text-red-500">*</span>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Info className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        Enter a clear, descriptive name for your product
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                <Label htmlFor="name" className="flex items-center gap-1">
+                  Product Name <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="name"
                   name="name"
-                  placeholder="e.g., Prenatal Vitamins"
+                  placeholder="Enter product name"
                   value={formik.values.name}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
@@ -258,31 +156,22 @@ export default function CreateProductPage() {
                   }
                 />
                 {formik.touched.name && formik.errors.name && (
-                  <p className="text-sm text-red-500">{formik.errors.name}</p>
+                  <p className="text-xs text-red-500">{formik.errors.name}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="category" className="flex items-center">
-                  Category <span className="ml-1 text-red-500">*</span>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Info className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        Select the category that best fits your product
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                <Label htmlFor="category" className="flex items-center gap-1">
+                  Category <span className="text-red-500">*</span>
                 </Label>
                 <Select
-                  value={formik.values.category}
-                  onValueChange={handleCategoryChange}
                   name="category"
+                  value={formik.values.category}
+                  onValueChange={(value) =>
+                    formik.setFieldValue("category", value)
+                  }
                 >
                   <SelectTrigger
-                    id="category"
                     className={
                       formik.touched.category && formik.errors.category
                         ? "border-red-500"
@@ -293,102 +182,23 @@ export default function CreateProductPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((category) => (
-                      <SelectItem key={category.slug} value={category.name}>
+                      <SelectItem key={category.id} value={category.id}>
                         {category.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 {formik.touched.category && formik.errors.category && (
-                  <p className="text-sm text-red-500">
+                  <p className="text-xs text-red-500">
                     {formik.errors.category}
                   </p>
                 )}
               </div>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="form" className="flex items-center">
-                  Form <span className="ml-1 text-red-500">*</span>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Info className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        Select the physical form of the product
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </Label>
-                <Select
-                  value={formik.values.form}
-                  onValueChange={(value) => formik.setFieldValue("form", value)}
-                  name="form"
-                >
-                  <SelectTrigger
-                    id="form"
-                    className={
-                      formik.touched.form && formik.errors.form
-                        ? "border-red-500"
-                        : ""
-                    }
-                  >
-                    <SelectValue placeholder="Select form" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {productForms.map((form) => (
-                      <SelectItem key={form} value={form}>
-                        {form}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {formik.touched.form && formik.errors.form && (
-                  <p className="text-sm text-red-500">{formik.errors.form}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="dosage" className="flex items-center">
-                  Dosage
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Info className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        Specify the recommended dosage (e.g., &quot;500mg, Once
-                        daily&quot;)
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </Label>
-                <Input
-                  id="dosage"
-                  name="dosage"
-                  placeholder="e.g., 500mg, Once daily"
-                  value={formik.values.dosage}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                />
-              </div>
-            </div>
-
             <div className="space-y-2">
-              <Label htmlFor="description" className="flex items-center">
-                Description
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      Provide a detailed description of the product
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+              <Label htmlFor="description" className="flex items-center gap-1">
+                Description <span className="text-red-500">*</span>
               </Label>
               <Textarea
                 id="description"
@@ -397,146 +207,87 @@ export default function CreateProductPage() {
                 value={formik.values.description}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
+                className={
+                  formik.touched.description && formik.errors.description
+                    ? "border-red-500"
+                    : ""
+                }
                 rows={3}
               />
-            </div>
-
-            <div className="flex items-center space-x-2 pt-2">
-              <Switch
-                id="requiresPrescription"
-                checked={formik.values.requiresPrescription}
-                onCheckedChange={(checked) =>
-                  formik.setFieldValue("requiresPrescription", checked)
-                }
-              />
-              <Label
-                htmlFor="requiresPrescription"
-                className="flex items-center"
-              >
-                Requires Prescription
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      Toggle if this product requires a prescription
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </Label>
-            </div>
-          </CardContent>
-
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <ClipboardList className="mr-2 h-5 w-5 text-primary" />
-              Additional Information
-            </CardTitle>
-            <CardDescription>
-              Set expiry date and additional details
-            </CardDescription>
-          </CardHeader>
-
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="expiryDate" className="flex items-center">
-                Expiry Date <span className="ml-1 text-red-500">*</span>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      Select the expiry date of the product
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !formik.values.expiryDate && "text-muted-foreground",
-                      formik.touched.expiryDate &&
-                        formik.errors.expiryDate &&
-                        "border-red-500",
-                    )}
-                  >
-                    <Calendar className="mr-2 h-4 w-4" />
-                    {formik.values.expiryDate ? (
-                      format(formik.values.expiryDate, "PPP")
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <CalendarComponent
-                    mode="single"
-                    selected={formik.values.expiryDate}
-                    onSelect={handleDateChange}
-                    initialFocus
-                    disabled={(date) => date < new Date()}
-                  />
-                </PopoverContent>
-              </Popover>
-              {formik.touched.expiryDate && formik.errors.expiryDate && (
-                <p className="text-sm text-red-500">
-                  {formik.errors.expiryDate as string}
+              {formik.touched.description && formik.errors.description && (
+                <p className="text-xs text-red-500">
+                  {formik.errors.description}
                 </p>
               )}
             </div>
 
-            <Alert>
-              <Info className="h-4 w-4" />
-              <AlertTitle>Important</AlertTitle>
-              <AlertDescription>
-                Products with expired dates will be automatically marked as
-                unavailable for purchase. Please ensure the expiry date is
-                accurate.
-              </AlertDescription>
-            </Alert>
-          </CardContent>
-
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <DollarSign className="mr-2 h-5 w-5 text-primary" />
-              Pricing & Inventory
-            </CardTitle>
-            <CardDescription>
-              Set the price and inventory details for your product
-            </CardDescription>
-          </CardHeader>
-
-          <CardContent className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="price" className="flex items-center">
-                  Price (BDT) <span className="ml-1 text-red-500">*</span>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Info className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        Enter the base price of the product
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                <Label htmlFor="form" className="flex items-center gap-1">
+                  Form <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="form"
+                  name="form"
+                  placeholder="Tablet, Capsule, Syrup, etc."
+                  value={formik.values.form}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className={
+                    formik.touched.form && formik.errors.form
+                      ? "border-red-500"
+                      : ""
+                  }
+                />
+                {formik.touched.form && formik.errors.form && (
+                  <p className="text-xs text-red-500">{formik.errors.form}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="dosage" className="flex items-center gap-1">
+                  Dosage <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="dosage"
+                  name="dosage"
+                  placeholder="500mg, 10ml, etc."
+                  value={formik.values.dosage}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className={
+                    formik.touched.dosage && formik.errors.dosage
+                      ? "border-red-500"
+                      : ""
+                  }
+                />
+                {formik.touched.dosage && formik.errors.dosage && (
+                  <p className="text-xs text-red-500">{formik.errors.dosage}</p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Pricing & Inventory */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Pricing & Inventory</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="price" className="flex items-center gap-1">
+                  Price (BDT) <span className="text-red-500">*</span>
                 </Label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                     ৳
                   </span>
                   <Input
                     id="price"
                     name="price"
-                    type="number"
-                    min="0"
-                    step="0.01"
+                    type="text"
                     placeholder="0.00"
                     value={formik.values.price}
                     onChange={formik.handleChange}
@@ -545,29 +296,18 @@ export default function CreateProductPage() {
                   />
                 </div>
                 {formik.touched.price && formik.errors.price && (
-                  <p className="text-sm text-red-500">{formik.errors.price}</p>
+                  <p className="text-xs text-red-500">{formik.errors.price}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="stock" className="flex items-center">
-                  Stock Quantity <span className="ml-1 text-red-500">*</span>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Info className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        Enter the number of units in stock
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                <Label htmlFor="stock" className="flex items-center gap-1">
+                  Stock <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="stock"
                   name="stock"
-                  type="number"
-                  min="0"
+                  type="text"
                   placeholder="0"
                   value={formik.values.stock}
                   onChange={formik.handleChange}
@@ -579,199 +319,146 @@ export default function CreateProductPage() {
                   }
                 />
                 {formik.touched.stock && formik.errors.stock && (
-                  <p className="text-sm text-red-500">{formik.errors.stock}</p>
+                  <p className="text-xs text-red-500">{formik.errors.stock}</p>
                 )}
               </div>
             </div>
 
-            <div className="rounded-md bg-muted p-4">
-              <div className="flex items-center space-x-2">
-                <Percent className="h-5 w-5 text-muted-foreground" />
-                <h3 className="text-sm font-medium">Discount Settings</h3>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="expiryDate" className="flex items-center gap-1">
+                  Expiry Date <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="expiryDate"
+                  name="expiryDate"
+                  type="date"
+                  value={formik.values.expiryDate}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className={
+                    formik.touched.expiryDate && formik.errors.expiryDate
+                      ? "border-red-500"
+                      : ""
+                  }
+                />
+                {formik.touched.expiryDate && formik.errors.expiryDate && (
+                  <p className="text-xs text-red-500">
+                    {formik.errors.expiryDate}
+                  </p>
+                )}
               </div>
-              <Separator className="my-3" />
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="discount" className="flex items-center">
-                    Discount Amount
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Info className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          Enter the discount amount (percentage or flat amount)
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </Label>
-                  <Input
-                    id="discount"
-                    name="discount"
-                    type="number"
-                    min="0"
-                    placeholder="0"
-                    value={formik.values.discount}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    className={
-                      formik.touched.discount && formik.errors.discount
-                        ? "border-red-500"
-                        : ""
-                    }
-                  />
-                  {formik.touched.discount && formik.errors.discount && (
-                    <p className="text-sm text-red-500">
-                      {formik.errors.discount}
-                    </p>
-                  )}
-                </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="discountType" className="flex items-center">
-                    Discount Type
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Info className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          Select whether the discount is a percentage or flat
-                          amount
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </Label>
+              <div className="space-y-2">
+                <Label htmlFor="discount" className="flex items-center gap-1">
+                  Discount
+                </Label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Input
+                      id="discount"
+                      name="discount"
+                      type="text"
+                      placeholder="0"
+                      value={formik.values.discount}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      className={
+                        formik.touched.discount && formik.errors.discount
+                          ? "border-red-500"
+                          : ""
+                      }
+                    />
+                  </div>
                   <Select
+                    name="discountType"
                     value={formik.values.discountType}
                     onValueChange={(value) =>
                       formik.setFieldValue("discountType", value)
                     }
-                    name="discountType"
                   >
-                    <SelectTrigger id="discountType">
-                      <SelectValue placeholder="Select type" />
+                    <SelectTrigger className="w-[140px]">
+                      <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="PERCENTAGE">Percentage (%)</SelectItem>
-                      <SelectItem value="FLAT">Flat Amount (BDT)</SelectItem>
+                      <SelectItem value="FLAT">Flat Amount</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
-
-              {formik.values.price &&
-                formik.values.discount &&
-                Number.parseFloat(formik.values.discount) > 0 && (
-                  <div className="mt-3 rounded-md bg-background p-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
-                        Original Price:
-                      </span>
-                      <span className="text-sm">
-                        ৳{" "}
-                        {Number.parseFloat(
-                          formik.values.price,
-                        ).toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
-                        Discount:
-                      </span>
-                      <span className="text-sm text-green-600">
-                        {formik.values.discountType === "PERCENTAGE"
-                          ? `${formik.values.discount}%`
-                          : `৳ ${Number.parseFloat(formik.values.discount).toLocaleString()}`}
-                      </span>
-                    </div>
-                    <Separator className="my-2" />
-                    <div className="flex items-center justify-between font-medium">
-                      <span className="text-sm">Final Price:</span>
-                      <span className="text-sm">
-                        ৳ {calculateDiscountedPrice().toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
+                {formik.touched.discount && formik.errors.discount && (
+                  <p className="text-xs text-red-500">
+                    {formik.errors.discount}
+                  </p>
                 )}
+              </div>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="inStock"
-                checked={formik.values.inStock}
-                onCheckedChange={(checked) =>
-                  formik.setFieldValue("inStock", checked)
-                }
-              />
-              <Label htmlFor="inStock" className="flex items-center">
-                Available for Purchase
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      Toggle if this product is available for purchase
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </Label>
-            </div>
-
-            <div className="rounded-md bg-muted p-4">
+            <div className="flex flex-wrap items-center gap-4">
               <div className="flex items-center space-x-2">
-                <Tag className="h-5 w-5 text-muted-foreground" />
-                <h3 className="text-sm font-medium">Product Status</h3>
+                <Switch
+                  id="requiresPrescription"
+                  name="requiresPrescription"
+                  checked={formik.values.requiresPrescription}
+                  onCheckedChange={(checked) =>
+                    formik.setFieldValue("requiresPrescription", checked)
+                  }
+                />
+                <Label htmlFor="requiresPrescription">
+                  Requires Prescription
+                </Label>
               </div>
-              <Separator className="my-3" />
-              <div className="space-y-4">
-                <div className="flex flex-col space-y-2">
-                  <Label className="text-sm">Current Status</Label>
-                  <div className="flex items-center space-x-2">
-                    <Badge
-                      variant={
-                        formik.values.inStock ? "default" : "destructive"
-                      }
-                      className="px-2 py-1"
-                    >
-                      {formik.values.inStock ? (
-                        <CheckCircle2 className="mr-1 h-3 w-3" />
-                      ) : (
-                        <AlertCircle className="mr-1 h-3 w-3" />
-                      )}
-                      {formik.values.inStock ? "In Stock" : "Out of Stock"}
-                    </Badge>
 
-                    {formik.values.requiresPrescription && (
-                      <Badge
-                        variant="outline"
-                        className="bg-amber-50 px-2 py-1 text-amber-700"
-                      >
-                        <Pill className="mr-1 h-3 w-3" />
-                        Prescription Required
-                      </Badge>
-                    )}
-                  </div>
-                </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="inStock"
+                  name="inStock"
+                  checked={formik.values.inStock}
+                  onCheckedChange={(checked) =>
+                    formik.setFieldValue("inStock", checked)
+                  }
+                />
+                <Label htmlFor="inStock">In Stock</Label>
               </div>
             </div>
+
+            {/* Price Preview */}
+            {formik.values.price && (
+              <div className="mt-4 flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">
+                  Final Price:
+                </span>
+                {hasDiscount ? (
+                  <div className="flex items-center gap-2">
+                    <Badge
+                      variant="outline"
+                      className="bg-green-50 text-green-700"
+                    >
+                      ৳ {discountedPrice.toFixed(2)}
+                    </Badge>
+                    <span className="text-sm text-muted-foreground line-through">
+                      ৳ {Number.parseFloat(formik.values.price).toFixed(2)}
+                    </span>
+                  </div>
+                ) : (
+                  <Badge variant="outline">
+                    ৳ {Number.parseFloat(formik.values.price).toFixed(2)}
+                  </Badge>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
 
         {/* Form Actions */}
-        <div className="flex justify-end space-x-4">
-          <Button
-            variant="outline"
-            type="button"
-            onClick={() => router.push("/admin/products")}
-          >
+        <div className="flex justify-end gap-3">
+          <Button variant="outline" type="button" onClick={() => router.back()}>
             Cancel
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
+          <Button type="submit" disabled={isSubmitting || !formik.isValid}>
             {isSubmitting ? (
               <>
-                <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></span>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Creating...
               </>
             ) : (
