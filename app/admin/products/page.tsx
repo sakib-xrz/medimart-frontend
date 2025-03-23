@@ -239,7 +239,7 @@ export default function ProductsPage() {
         <div className="relative w-full sm:max-w-xs">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search customers..."
+            placeholder="Search products..."
             className="w-full pl-8"
             value={searchKey}
             onChange={handleSearchChange}
@@ -346,7 +346,7 @@ export default function ProductsPage() {
                             </DropdownMenuItem>
                           </Link>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-red-600">
+                          <DropdownMenuItem className="cursor-pointer focus:bg-destructive focus:text-destructive-foreground">
                             <Trash className="mr-2 h-4 w-4" />
                             Delete Product
                           </DropdownMenuItem>
@@ -453,9 +453,6 @@ export default function ProductsPage() {
                   <TableHead className="hidden text-center md:table-cell">
                     Price
                   </TableHead>
-                  <TableHead className="hidden text-center md:table-cell">
-                    Prescription Required
-                  </TableHead>
                   <TableHead className="text-center">Status</TableHead>
                   <TableHead className="hidden md:table-cell">Expiry</TableHead>
                   <TableHead className="hidden text-center md:table-cell">
@@ -495,21 +492,6 @@ export default function ProductsPage() {
                         </p>
                       )}
                     </TableCell>
-                    <TableCell className="hidden text-center uppercase md:table-cell">
-                      {
-                        <Badge
-                          variant={
-                            product.requires_prescription
-                              ? "default"
-                              : "outline"
-                          }
-                        >
-                          {product.requires_prescription
-                            ? "Required"
-                            : "Not Required"}
-                        </Badge>
-                      }
-                    </TableCell>
                     <TableCell className="text-center">
                       {renderStatusBadge(product)}
                     </TableCell>
@@ -542,7 +524,7 @@ export default function ProductsPage() {
                             </DropdownMenuItem>
                           </Link>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-red-600">
+                          <DropdownMenuItem className="cursor-pointer focus:bg-destructive focus:text-destructive-foreground">
                             <Trash className="h-4 w-4" />
                             Delete Product
                           </DropdownMenuItem>
