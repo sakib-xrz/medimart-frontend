@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ClipboardList,
   MoreHorizontal,
   Search,
   Trash,
-  UserCog,
   X,
   Users,
   Loader2,
@@ -37,88 +36,84 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useGetCustomerQuery } from "@/redux/features/user/userApi";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useDebouncedCallback } from "use-debounce";
+import { generateQueryString, sanitizeParams } from "@/lib/utils";
+import CustomPagination from "@/app/(public)/_components/custom-pagination";
 
-// Sample customer data
-const customers = [
-  {
-    id: "CUST-001",
-    name: "Ahmed Khan",
-    email: "ahmed.khan@example.com",
-    phone: "+880 1712 345678",
-    orders: 12,
-    totalSpent: 15420,
-    status: "active",
-    joinedDate: "2023-05-12",
-  },
-  {
-    id: "CUST-002",
-    name: "Fatima Rahman",
-    email: "fatima.r@example.com",
-    phone: "+880 1812 345678",
-    orders: 8,
-    totalSpent: 9850,
-    status: "active",
-    joinedDate: "2023-06-24",
-  },
-  {
-    id: "CUST-003",
-    name: "Mohammad Ali",
-    email: "mohammad.ali@example.com",
-    phone: "+880 1912 345678",
-    orders: 5,
-    totalSpent: 4250,
-    status: "active",
-    joinedDate: "2023-07-15",
-  },
-  {
-    id: "CUST-004",
-    name: "Nusrat Jahan",
-    email: "nusrat.j@example.com",
-    phone: "+880 1612 345678",
-    orders: 15,
-    totalSpent: 18750,
-    status: "active",
-    joinedDate: "2023-04-08",
-  },
-  {
-    id: "CUST-005",
-    name: "Kamal Hossain",
-    email: "kamal.h@example.com",
-    phone: "+880 1512 345678",
-    orders: 3,
-    totalSpent: 2150,
-    status: "blocked",
-    joinedDate: "2023-08-19",
-  },
-];
+interface Customer {
+  _id: string;
+  name: string;
+  email: string;
+  role: "CUSTOMER";
+  status: "ACTIVE" | "BLOCKED";
+  createdAt: string;
+  total_spent: number;
+  total_orders: number;
+}
 
 export default function CustomersPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [isLoading, setIsLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [searchKey, setSearchKey] = useState(searchParams.get("search") || "");
 
-  // Filter customers based on search query and status
-  const filteredCustomers = customers.filter((customer) => {
-    const matchesSearch =
-      customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      customer.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      customer.id.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesStatus =
-      statusFilter === "all" || customer.status === statusFilter;
-
-    return matchesSearch && matchesStatus;
+  const [params, setParams] = useState({
+    search: searchParams.get("search") || "",
+    status: searchParams.get("status") || "",
+    page: Number(searchParams.get("page")) || 1,
+    limit: Number(searchParams.get("limit")) || 20,
   });
 
-  const handleStatusChange = (customerId: string, newStatus: string) => {
-    // In a real application, this would call an API to update the status
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      console.log(`Changing customer ${customerId} status to ${newStatus}`);
-      setIsLoading(false);
-    }, 500);
-    // For demo purposes, we would update the state here
+  const debouncedSearch = useDebouncedCallback((value) => {
+    setParams((prev) => ({ ...prev, search: value, page: 1 }));
+  }, 400);
+
+  const modifyParams = {
+    ...params,
+    status: params.status === "all" ? "" : params.status,
+  };
+
+  const updateURL = () => {
+    const queryString = generateQueryString(modifyParams);
+    router.push(
+      decodeURIComponent(`/admin/customers${queryString}`),
+      undefined,
+      // @ts-expect-error - Fix this later
+      {
+        shallow: true,
+      },
+    );
+  };
+
+  const debouncedUpdateURL = useDebouncedCallback(updateURL, 500);
+
+  useEffect(() => {
+    debouncedUpdateURL();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    setSearchKey(value);
+    debouncedSearch(value);
+  };
+
+  const handleStatusChange = (customerId: string, newStatus: string) => {};
+
+  const { data: customersData, isLoading: isCustomersLoading } =
+    useGetCustomerQuery(sanitizeParams(modifyParams));
+
+  const customers = customersData?.data || [];
+
+  const meta = customersData?.meta || {};
+
+  const totalPages = Math.ceil(meta.total / meta.limit);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setParams((prev) => ({ ...prev, page }));
+    }
   };
 
   // Loading state component
@@ -135,7 +130,7 @@ export default function CustomersPage() {
       <Users className="mb-4 h-12 w-12 text-muted-foreground" />
       <h3 className="mb-1 text-lg font-medium">No customers yet</h3>
       <p className="text-muted-foreground">
-        You haven&apos;t added any customers to your store yet.
+        You don&apos;t have any customers in your store yet.
       </p>
     </div>
   );
@@ -148,7 +143,17 @@ export default function CustomersPage() {
       <p className="mb-4 text-muted-foreground">
         No customers match your search criteria.
       </p>
-      <Button variant="outline" onClick={() => setSearchQuery("")}>
+      <Button
+        variant="outline"
+        onClick={() => {
+          setSearchKey("");
+          setParams((prevParams) => ({
+            ...prevParams,
+            search: "",
+            page: 1,
+          }));
+        }}
+      >
         Clear Search
       </Button>
     </div>
@@ -169,13 +174,20 @@ export default function CustomersPage() {
           <Input
             placeholder="Search customers..."
             className="w-full pl-8"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={searchKey}
+            onChange={handleSearchChange}
           />
-          {searchQuery && (
+          {searchKey && (
             <button
               className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
-              onClick={() => setSearchQuery("")}
+              onClick={() => {
+                setSearchKey("");
+                setParams((prevParams) => ({
+                  ...prevParams,
+                  search: "",
+                  page: 1,
+                }));
+              }}
               aria-label="Clear search"
             >
               <X className="h-4 w-4" />
@@ -183,116 +195,125 @@ export default function CustomersPage() {
           )}
         </div>
         <div className="flex w-full items-center gap-2 sm:w-auto">
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select
+            value={params.status}
+            onValueChange={(value) => {
+              setParams((prevParams) => ({
+                ...prevParams,
+                status: value,
+              }));
+            }}
+          >
             <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="blocked">Blocked</SelectItem>
+              <SelectItem value="ACTIVE">Active</SelectItem>
+              <SelectItem value="BLOCKED">Blocked</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
 
-      {isLoading ? (
+      {isCustomersLoading ? (
         <LoadingState />
-      ) : customers.length === 0 ? (
+      ) : customers.length === 0 && !params.search.length ? (
         <EmptyState />
-      ) : filteredCustomers.length === 0 ? (
+      ) : customers.length === 0 && params.search.length ? (
         <EmptySearchState />
       ) : (
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Customer</TableHead>
-                <TableHead className="hidden text-center md:table-cell">
-                  Orders
-                </TableHead>
-                <TableHead className="hidden text-center md:table-cell">
-                  Total Spent
-                </TableHead>
-                <TableHead className="hidden text-center md:table-cell">
-                  Joined
-                </TableHead>
-                <TableHead className="hidden text-center sm:table-cell">
-                  Change Status
-                </TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredCustomers.map((customer) => (
-                <TableRow key={customer.id}>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{customer.name}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {customer.email}
-                      </div>
-                      <div className="text-sm text-muted-foreground md:hidden">
-                        {customer.phone}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="hidden text-center md:table-cell">
-                    {customer.orders}
-                  </TableCell>
-                  <TableCell className="hidden text-center md:table-cell">
-                    BDT {customer.totalSpent.toLocaleString()}
-                  </TableCell>
-                  <TableCell className="hidden text-center md:table-cell">
-                    {new Date(customer.joinedDate).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell className="hidden text-center sm:table-cell">
-                    <Select
-                      defaultValue={customer.status}
-                      onValueChange={(value) =>
-                        handleStatusChange(customer.id, value)
-                      }
-                    >
-                      <SelectTrigger className="mx-auto w-[120px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="blocked">Blocked</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Open menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-44">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem className="cursor-pointer">
-                          <UserCog className="mr-1 h-4 w-4" />
-                          Edit Details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="cursor-pointer">
-                          <ClipboardList className="mr-1 h-4 w-4" />
-                          View Orders
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="cursor-pointer focus:bg-destructive focus:text-destructive-foreground">
-                          <Trash className="mr-1 h-4 w-4" />
-                          Delete Customer
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
+        <>
+          <div className="rounded-md border bg-white">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Customer</TableHead>
+                  <TableHead className="hidden text-center md:table-cell">
+                    Orders
+                  </TableHead>
+                  <TableHead className="hidden text-center md:table-cell">
+                    Total Spent
+                  </TableHead>
+                  <TableHead className="hidden text-center md:table-cell">
+                    Joined
+                  </TableHead>
+                  <TableHead className="hidden text-center sm:table-cell">
+                    Change Status
+                  </TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
+              <TableBody>
+                {customers.map((customer: Customer) => (
+                  <TableRow key={customer._id}>
+                    <TableCell>
+                      <div>
+                        <div className="font-medium">{customer.name}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {customer.email}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden text-center md:table-cell">
+                      {customer.total_orders}
+                    </TableCell>
+                    <TableCell className="hidden text-center md:table-cell">
+                      BDT {customer.total_spent.toLocaleString()}
+                    </TableCell>
+                    <TableCell className="hidden text-center md:table-cell">
+                      {new Date(customer.createdAt).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="hidden text-center sm:table-cell">
+                      <Select
+                        defaultValue={customer.status}
+                        onValueChange={(value) =>
+                          handleStatusChange(customer._id, value)
+                        }
+                      >
+                        <SelectTrigger className="mx-auto w-[120px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="ACTIVE">Active</SelectItem>
+                          <SelectItem value="BLOCKED">Blocked</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Open menu</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-44">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem className="cursor-pointer">
+                            <ClipboardList className="mr-1 h-4 w-4" />
+                            View Orders
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="cursor-pointer focus:bg-destructive focus:text-destructive-foreground">
+                            <Trash className="mr-1 h-4 w-4" />
+                            Delete Customer
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          <CustomPagination
+            params={params}
+            totalPages={totalPages}
+            handlePageChange={handlePageChange}
+          />
+        </>
       )}
     </div>
   );
