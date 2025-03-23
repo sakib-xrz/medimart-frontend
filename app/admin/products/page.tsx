@@ -10,6 +10,11 @@ import {
   Trash,
   Package,
   Loader2,
+  Tag,
+  Pill,
+  Calendar,
+  PackageX,
+  PackageCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -80,6 +85,27 @@ export default function ProductsPage() {
     } else {
       return <Badge variant="default">In Stock</Badge>;
     }
+  };
+
+  // Get product status
+  const getProductStatus = (product: IProduct) => {
+    if (isExpired(product.expiry_date))
+      return {
+        label: "Expired",
+        variant: "destructive" as const,
+        icon: PackageX,
+      };
+    if (!product.in_stock)
+      return {
+        label: "Out of Stock",
+        variant: "destructive" as const,
+        icon: PackageX,
+      };
+    return {
+      label: "In Stock",
+      variant: "default" as const,
+      icon: PackageCheck,
+    };
   };
 
   // Filter products based on search query, category, and status
@@ -218,99 +244,135 @@ export default function ProductsPage() {
         <>
           {/* Card view for smaller screens */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:hidden">
-            {filteredProducts.map((product: IProduct) => (
-              <Card key={product._id} className="overflow-hidden">
-                <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-                  <div>
-                    <h3 className="line-clamp-1 font-semibold">
-                      {product.name}
-                    </h3>
-                    <p className="text-xs uppercase text-muted-foreground">
-                      {product.slug}
-                    </p>
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="-mt-1">
-                        <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Open menu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-40">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <Link href={`/admin/products/${product._id}/edit`}>
-                        <DropdownMenuItem>
-                          <Edit className="h-4 w-4" />
-                          Edit Product
-                        </DropdownMenuItem>
-                      </Link>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-red-600">
-                        <Trash className="h-4 w-4" />
-                        Delete Product
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </CardHeader>
-                <CardContent className="pb-2">
-                  <div className="flex flex-col space-y-2">
-                    <div className="flex items-center text-sm">
-                      <span className="text-muted-foreground">Category:</span>
-                      <span className="ml-2 font-medium">
-                        {product.category}
-                      </span>
+            {filteredProducts.map((product: IProduct) => {
+              const status = getProductStatus(product);
+              const discountedPrice = calculateDiscountedPrice(product);
+              const hasDiscount = product.discount > 0;
+
+              return (
+                <Card key={product._id} className="overflow-hidden bg-white">
+                  <CardHeader className="relative border-b bg-muted/30 pb-2 pt-3">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-0.5">
+                        <h3 className="line-clamp-1 text-base font-semibold">
+                          {product.name}
+                        </h3>
+                        <p className="text-xs uppercase text-muted-foreground">
+                          {product.slug}
+                        </p>
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="-mr-2 -mt-1"
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Open menu</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-40">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <Link href={`/admin/products/${product._id}/edit`}>
+                            <DropdownMenuItem>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit Product
+                            </DropdownMenuItem>
+                          </Link>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-red-600">
+                            <Trash className="mr-2 h-4 w-4" />
+                            Delete Product
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
-                    <div className="flex items-center text-sm">
-                      <span className="text-muted-foreground">Form:</span>
-                      <span className="ml-2 font-medium">
-                        {product.form} • {product.dosage}
-                      </span>
+                  </CardHeader>
+
+                  <CardContent className="space-y-4 p-4">
+                    {/* Left column */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Tag className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm font-medium">
+                          {product.category}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Pill className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">
+                          {product.form} • {product.dosage}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span
+                          className={`text-sm ${isExpired(product.expiry_date) ? "font-medium text-red-600" : ""}`}
+                        >
+                          {formatExpiryDate(product.expiry_date)}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center text-sm">
-                      <span className="text-muted-foreground">Expiry:</span>
-                      <span
-                        className={`ml-2 font-medium ${
-                          isExpired(product.expiry_date) ? "text-red-600" : ""
-                        }`}
-                      >
-                        {formatExpiryDate(product.expiry_date)}
-                      </span>
-                    </div>
-                    <div className="flex items-center text-sm">
-                      <span className="text-muted-foreground">Stock:</span>
-                      <span className="ml-2 font-medium">
-                        {product.stock} units
-                      </span>
-                    </div>
-                    <div className="flex items-center text-sm">
-                      <span className="text-muted-foreground">Price:</span>
-                      <span className="ml-2 font-medium">
-                        BDT {calculateDiscountedPrice(product).toLocaleString()}
-                        {product.discount > 0 && (
-                          <span className="ml-1 text-green-600">
-                            (
-                            {product.discount_type === "PERCENTAGE"
-                              ? `${product.discount}% off`
-                              : `BDT ${product.discount} off`}
-                            )
-                          </span>
+
+                    <div className="flex w-full items-center gap-4">
+                      {/* Price with discount */}
+                      <div className="h-[86px] flex-1 rounded-md bg-muted/50 p-3 text-center">
+                        <p className="text-xs text-muted-foreground">Price</p>
+                        <p className="text-lg font-semibold">
+                          BDT {discountedPrice.toLocaleString()}
+                        </p>
+                        {hasDiscount && (
+                          <div className="mt-0.5 flex items-center justify-center gap-1 text-xs text-green-600">
+                            <span className="text-muted-foreground line-through">
+                              BDT {product.price.toLocaleString()}
+                            </span>
+                            <span>
+                              {product.discount_type === "PERCENTAGE"
+                                ? `(${product.discount}% off)`
+                                : `(BDT ${product.discount} off)`}
+                            </span>
+                          </div>
                         )}
-                      </span>
+                      </div>
+
+                      {/* Stock */}
+                      <div className="h-[86px] flex-1 rounded-md bg-muted/50 p-3 text-center">
+                        <p className="text-xs text-muted-foreground">Stock</p>
+                        <p className="text-lg font-semibold">{product.stock}</p>
+                        <p className="text-xs text-muted-foreground">units</p>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-                <CardFooter className="flex items-center justify-between pt-2">
-                  <div>
-                    {renderStatusBadge(product)}
+                  </CardContent>
+
+                  <CardFooter className="flex items-center justify-between border-t bg-muted/20 px-4 py-2">
                     {product.requires_prescription && (
-                      <Badge variant="outline" className="ml-2">
-                        Prescription
+                      <Badge
+                        variant="outline"
+                        className="border-amber-400 text-amber-600"
+                      >
+                        Prescription Required
                       </Badge>
                     )}
-                  </div>
-                </CardFooter>
-              </Card>
-            ))}
+                    {!product.requires_prescription && (
+                      <span className="text-xs text-muted-foreground">
+                        No prescription needed
+                      </span>
+                    )}
+
+                    <Badge
+                      variant={status.variant}
+                      className="flex items-center gap-1 shadow-sm"
+                    >
+                      <status.icon className="h-3 w-3" />
+                      {status.label}
+                    </Badge>
+                  </CardFooter>
+                </Card>
+              );
+            })}
           </div>
 
           {/* Table view for larger screens */}
