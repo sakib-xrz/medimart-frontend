@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Calendar } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,8 +20,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { format } from "date-fns";
 import Link from "next/link";
 import { categories, forms } from "@/lib/constant";
+import { cn } from "@/lib/utils";
 
 // Form validation schema
 const validationSchema = Yup.object({
@@ -34,12 +42,14 @@ const validationSchema = Yup.object({
     .required("Price is required")
     .positive("Price must be positive")
     .typeError("Price must be a number"),
+  pack_size: Yup.string(),
+  manufacturer: Yup.string(),
   stock: Yup.number()
     .required("Stock is required")
     .integer("Stock must be a whole number")
     .min(0, "Stock cannot be negative")
     .typeError("Stock must be a number"),
-  expiryDate: Yup.date()
+  expiry_date: Yup.date()
     .required("Expiry date is required")
     .min(new Date(), "Expiry date cannot be in the past")
     .typeError("Invalid date format"),
@@ -59,13 +69,15 @@ export default function CreateProductPage() {
       description: "",
       form: "",
       dosage: "",
+      pack_size: "",
+      manufacturer: "",
       price: "",
       stock: "",
-      expiryDate: "",
+      expiry_date: new Date(),
       discount: "0",
-      discountType: "PERCENTAGE",
-      requiresPrescription: false,
-      inStock: true,
+      discount_type: "PERCENTAGE",
+      requires_prescription: false,
+      in_stock: true,
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -78,18 +90,18 @@ export default function CreateProductPage() {
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       // Redirect to products page after successful creation
-      router.push("/admin/products");
+      //   router.push("/admin/products");
     },
   });
 
   // Calculate discounted price
   const calculateDiscountedPrice = () => {
-    const price = Number.parseFloat(formik.values.price) || 0;
-    const discount = Number.parseFloat(formik.values.discount) || 0;
+    const price = Number.parseFloat(String(formik.values.price)) || 0;
+    const discount = Number.parseFloat(String(formik.values.discount)) || 0;
 
     if (discount <= 0) return price;
 
-    if (formik.values.discountType === "PERCENTAGE") {
+    if (formik.values.discount_type === "PERCENTAGE") {
       return price - (price * discount) / 100;
     } else {
       return price - discount;
@@ -98,8 +110,14 @@ export default function CreateProductPage() {
 
   const discountedPrice = calculateDiscountedPrice();
   const hasDiscount =
-    Number.parseFloat(formik.values.discount) > 0 &&
-    discountedPrice < Number.parseFloat(formik.values.price || "0");
+    Number.parseFloat(String(formik.values.discount)) > 0 &&
+    discountedPrice < Number.parseFloat(String(formik.values.price || "0"));
+
+  const handleDateChange = (date: Date | undefined) => {
+    if (date) {
+      formik.setFieldValue("expiry_date", date);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -265,6 +283,39 @@ export default function CreateProductPage() {
                 )}
               </div>
             </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="pack_size" className="flex items-center gap-1">
+                  Pack Size
+                </Label>
+                <Input
+                  id="pack_size"
+                  name="pack_size"
+                  placeholder="10 tablets, 100ml, etc."
+                  value={formik.values.pack_size}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="manufacturer"
+                  className="flex items-center gap-1"
+                >
+                  Manufacturer
+                </Label>
+                <Input
+                  id="manufacturer"
+                  name="manufacturer"
+                  placeholder="ABC Pharmaceuticals Ltd."
+                  value={formik.values.manufacturer}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+              </div>
+            </div>
           </CardContent>
         </Card>
 
@@ -325,27 +376,38 @@ export default function CreateProductPage() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="expiryDate" className="flex items-center gap-1">
-                  Expiry Date <span className="text-red-500">*</span>
+                <Label
+                  htmlFor="expiry_date"
+                  className="flex items-center gap-1"
+                >
+                  Expiry Date
                 </Label>
-                <Input
-                  id="expiryDate"
-                  name="expiryDate"
-                  type="date"
-                  value={formik.values.expiryDate}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  className={
-                    formik.touched.expiryDate && formik.errors.expiryDate
-                      ? "border-red-500"
-                      : ""
-                  }
-                />
-                {formik.touched.expiryDate && formik.errors.expiryDate && (
-                  <p className="text-xs text-red-500">
-                    {formik.errors.expiryDate}
-                  </p>
-                )}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal hover:bg-transparent hover:text-black",
+                        !formik.values.expiry_date && "text-muted-foreground",
+                      )}
+                    >
+                      <Calendar className="mr-2 h-4 w-4" />
+                      {formik.values.expiry_date ? (
+                        format(formik.values.expiry_date, "PPP")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={formik.values.expiry_date}
+                      onSelect={handleDateChange}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
 
               <div className="space-y-2">
@@ -370,10 +432,10 @@ export default function CreateProductPage() {
                     />
                   </div>
                   <Select
-                    name="discountType"
-                    value={formik.values.discountType}
+                    name="discount_type"
+                    value={formik.values.discount_type}
                     onValueChange={(value) =>
-                      formik.setFieldValue("discountType", value)
+                      formik.setFieldValue("discount_type", value)
                     }
                   >
                     <SelectTrigger className="w-[140px]">
@@ -396,33 +458,33 @@ export default function CreateProductPage() {
             <div className="flex flex-wrap items-center gap-4">
               <div className="flex items-center space-x-2">
                 <Switch
-                  id="requiresPrescription"
-                  name="requiresPrescription"
-                  checked={formik.values.requiresPrescription}
+                  id="requires_prescription"
+                  name="requires_prescription"
+                  checked={formik.values.requires_prescription}
                   onCheckedChange={(checked) =>
-                    formik.setFieldValue("requiresPrescription", checked)
+                    formik.setFieldValue("requires_prescription", checked)
                   }
                 />
-                <Label htmlFor="requiresPrescription">
+                <Label htmlFor="requires_prescription">
                   Requires Prescription
                 </Label>
               </div>
 
               <div className="flex items-center space-x-2">
                 <Switch
-                  id="inStock"
-                  name="inStock"
-                  checked={formik.values.inStock}
+                  id="in_stock"
+                  name="in_stock"
+                  checked={formik.values.in_stock}
                   onCheckedChange={(checked) =>
-                    formik.setFieldValue("inStock", checked)
+                    formik.setFieldValue("in_stock", checked)
                   }
                 />
-                <Label htmlFor="inStock">In Stock</Label>
+                <Label htmlFor="in_stock">In Stock</Label>
               </div>
             </div>
 
             {/* Price Preview */}
-            {formik.values.price && (
+            {Number(formik.values.price) > 0 && (
               <div className="mt-4 flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">
                   Final Price:
@@ -436,12 +498,16 @@ export default function CreateProductPage() {
                       ৳ {discountedPrice.toFixed(2)}
                     </Badge>
                     <span className="text-sm text-muted-foreground line-through">
-                      ৳ {Number.parseFloat(formik.values.price).toFixed(2)}
+                      ৳{" "}
+                      {Number.parseFloat(String(formik.values.price)).toFixed(
+                        2,
+                      )}
                     </span>
                   </div>
                 ) : (
                   <Badge variant="outline">
-                    ৳ {Number.parseFloat(formik.values.price).toFixed(2)}
+                    ৳{" "}
+                    {Number.parseFloat(String(formik.values.price)).toFixed(2)}
                   </Badge>
                 )}
               </div>
