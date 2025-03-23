@@ -21,17 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-
-// Mock categories for the form
-const categories = [
-  { id: "1", name: "Pain Relief", slug: "pain-relief" },
-  { id: "2", name: "Cold & Flu", slug: "cold-and-flu" },
-  { id: "3", name: "Digestive Health", slug: "digestive-health" },
-  { id: "4", name: "Vitamins & Supplements", slug: "vitamins-and-supplements" },
-  { id: "5", name: "Women's Health", slug: "womens-health" },
-  { id: "6", name: "Men's Health", slug: "mens-health" },
-  { id: "7", name: "Skin Care", slug: "skin-care" },
-];
+import { categories, forms } from "@/lib/constant";
 
 // Form validation schema
 const validationSchema = Yup.object({
@@ -182,8 +172,8 @@ export default function CreateProductPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
+                      <SelectItem key={category.id} value={category.title}>
+                        {category.title}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -226,19 +216,28 @@ export default function CreateProductPage() {
                 <Label htmlFor="form" className="flex items-center gap-1">
                   Form <span className="text-red-500">*</span>
                 </Label>
-                <Input
-                  id="form"
+                <Select
                   name="form"
-                  placeholder="Tablet, Capsule, Syrup, etc."
                   value={formik.values.form}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  className={
-                    formik.touched.form && formik.errors.form
-                      ? "border-red-500"
-                      : ""
-                  }
-                />
+                  onValueChange={(value) => formik.setFieldValue("form", value)}
+                >
+                  <SelectTrigger
+                    className={
+                      formik.touched.form && formik.errors.form
+                        ? "border-red-500"
+                        : ""
+                    }
+                  >
+                    <SelectValue placeholder="Select form" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {forms.map((form, index) => (
+                      <SelectItem key={index} value={form}>
+                        {form}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 {formik.touched.form && formik.errors.form && (
                   <p className="text-xs text-red-500">{formik.errors.form}</p>
                 )}
@@ -381,7 +380,7 @@ export default function CreateProductPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="PERCENTAGE">Percentage (%)</SelectItem>
+                      <SelectItem value="PERCENTAGE">Percentage</SelectItem>
                       <SelectItem value="FLAT">Flat Amount</SelectItem>
                     </SelectContent>
                   </Select>
