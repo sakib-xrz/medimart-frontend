@@ -1,5 +1,7 @@
 "use client";
 
+import type React from "react";
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
@@ -61,6 +63,23 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from "use-debounce";
 import CustomPagination from "@/app/(public)/_components/custom-pagination";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 
 export default function ProductsPage() {
   const router = useRouter();
@@ -74,6 +93,10 @@ export default function ProductsPage() {
     page: Number(searchParams.get("page")) || 1,
     limit: Number(searchParams.get("limit")) || 20,
   });
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleteDrawerOpen, setIsDeleteDrawerOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<IProduct | null>(null);
 
   const debouncedSearch = useDebouncedCallback((value) => {
     setParams((prev) => ({ ...prev, search: value, page: 1 }));
@@ -218,6 +241,16 @@ export default function ProductsPage() {
     </div>
   );
 
+  const handleConfirmDelete = () => {
+    // Here you would call your delete API
+    console.log("Deleting product:", productToDelete?._id);
+    // After successful deletion:
+    setIsDeleteDialogOpen(false);
+    setIsDeleteDrawerOpen(false);
+    setProductToDelete(null);
+    // You might want to refetch the products list here
+  };
+
   return (
     <div className="space-y-6">
       {/* Header & Filter/Search Panel */}
@@ -347,7 +380,13 @@ export default function ProductsPage() {
                             </DropdownMenuItem>
                           </Link>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="cursor-pointer focus:bg-destructive focus:text-destructive-foreground">
+                          <DropdownMenuItem
+                            className="cursor-pointer focus:bg-destructive focus:text-destructive-foreground"
+                            onClick={() => {
+                              setProductToDelete(product);
+                              setIsDeleteDrawerOpen(true);
+                            }}
+                          >
                             <Trash className="mr-2 h-4 w-4" />
                             Delete Product
                           </DropdownMenuItem>
@@ -537,8 +576,14 @@ export default function ProductsPage() {
                             </DropdownMenuItem>
                           </Link>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="cursor-pointer focus:bg-destructive focus:text-destructive-foreground">
-                            <Trash className="h-4 w-4" />
+                          <DropdownMenuItem
+                            className="cursor-pointer focus:bg-destructive focus:text-destructive-foreground"
+                            onClick={() => {
+                              setProductToDelete(product);
+                              setIsDeleteDialogOpen(true);
+                            }}
+                          >
+                            <Trash className="mr-2 h-4 w-4" />
                             Delete Product
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -556,6 +601,60 @@ export default function ProductsPage() {
             handlePageChange={handlePageChange}
           />
         </>
+      )}
+      {/* Delete Confirmation Dialog/Drawer */}
+      {isDeleteDialogOpen && (
+        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Confirm Product Deletion</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete{" "}
+                <span className="font-semibold">{productToDelete?.name}</span>?
+                This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="mt-4 flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsDeleteDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleConfirmDelete}>
+                Delete Product
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {isDeleteDrawerOpen && (
+        <Drawer open={isDeleteDrawerOpen} onOpenChange={setIsDeleteDrawerOpen}>
+          <DrawerContent>
+            <DrawerHeader className="text-left">
+              <DrawerTitle>Confirm Product Deletion</DrawerTitle>
+              <DrawerDescription>
+                Are you sure you want to delete{" "}
+                <span className="font-semibold">{productToDelete?.name}</span>?
+                This action cannot be undone.
+              </DrawerDescription>
+            </DrawerHeader>
+            <DrawerFooter className="flex flex-row justify-end gap-2 pt-2">
+              <DrawerClose asChild>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsDeleteDrawerOpen(false)}
+                >
+                  Cancel
+                </Button>
+              </DrawerClose>
+              <Button variant="destructive" onClick={handleConfirmDelete}>
+                Delete Product
+              </Button>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
       )}
     </div>
   );
