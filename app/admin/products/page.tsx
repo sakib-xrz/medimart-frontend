@@ -339,7 +339,7 @@ export default function ProductsPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-40">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <Link href={`/admin/products/${product._id}/edit`}>
+                          <Link href={`/admin/products/${product.slug}/edit`}>
                             <DropdownMenuItem>
                               <Edit className="mr-2 h-4 w-4" />
                               Edit Product
@@ -517,7 +517,7 @@ export default function ProductsPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-40">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <Link href={`/admin/products/${product._id}/edit`}>
+                          <Link href={`/admin/products/${product.slug}/edit`}>
                             <DropdownMenuItem>
                               <Edit className="h-4 w-4" />
                               Edit Product

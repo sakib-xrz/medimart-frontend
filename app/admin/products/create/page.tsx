@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -30,6 +29,9 @@ import { format } from "date-fns";
 import Link from "next/link";
 import { categories, forms } from "@/lib/constant";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { useEffect } from "react";
+import { useCreateProductMutation } from "@/redux/features/product/productApi";
 
 // Form validation schema
 const validationSchema = Yup.object({
@@ -60,39 +62,55 @@ const validationSchema = Yup.object({
 
 export default function CreateProductPage() {
   const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [createProduct, { isLoading: isCreatingProduct }] =
+    useCreateProductMutation();
 
   const formik = useFormik({
     initialValues: {
-      name: "",
-      category: "",
-      description: "",
-      form: "",
-      dosage: "",
-      pack_size: "",
-      manufacturer: "",
-      price: "",
-      stock: "",
+      name: "Paracetamol 500mg Tablets",
+      category: "Pain Relief",
+      description: "Effective pain reliever and fever reducer.",
+      form: "Tablet",
+      dosage: "500mg",
+      pack_size: "10 tablets per strip",
+      manufacturer: "GlaxoSmithKline",
+      price: "50",
+      stock: "100",
       expiry_date: new Date(),
-      discount: "0",
+      discount: "10",
       discount_type: "PERCENTAGE",
       requires_prescription: false,
       in_stock: true,
     },
     validationSchema,
     onSubmit: async (values) => {
-      setIsSubmitting(true);
+      const payload = {
+        ...values,
+        price: Number(values.price),
+        stock: Number(values.stock),
+        discount: Number(values.discount),
+        expiry_date: format(values.expiry_date, "yyyy-MM-dd"),
+      };
 
-      // Simulate API call
-      console.log("Submitting product:", values);
+      try {
+        const response = await createProduct(payload).unwrap();
 
-      // Simulate delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Redirect to products page after successful creation
-      //   router.push("/admin/products");
+        if (response) {
+          toast.success("Product created successfully.");
+          router.push("/admin/products");
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to create product.");
+      }
     },
   });
+
+  useEffect(() => {
+    formik.setFieldValue("in_stock", Number(formik.values.stock) > 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formik.values.stock]);
 
   // Calculate discounted price
   const calculateDiscountedPrice = () => {
@@ -380,7 +398,7 @@ export default function CreateProductPage() {
                   htmlFor="expiry_date"
                   className="flex items-center gap-1"
                 >
-                  Expiry Date
+                  Expiry Date <span className="text-red-500">*</span>
                 </Label>
                 <Popover>
                   <PopoverTrigger asChild>
@@ -475,9 +493,7 @@ export default function CreateProductPage() {
                   id="in_stock"
                   name="in_stock"
                   checked={formik.values.in_stock}
-                  onCheckedChange={(checked) =>
-                    formik.setFieldValue("in_stock", checked)
-                  }
+                  disabled
                 />
                 <Label htmlFor="in_stock">In Stock</Label>
               </div>
@@ -520,8 +536,8 @@ export default function CreateProductPage() {
           <Button variant="outline" type="button" onClick={() => router.back()}>
             Cancel
           </Button>
-          <Button type="submit" disabled={isSubmitting || !formik.isValid}>
-            {isSubmitting ? (
+          <Button type="submit" disabled={isCreatingProduct}>
+            {isCreatingProduct ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Creating...
