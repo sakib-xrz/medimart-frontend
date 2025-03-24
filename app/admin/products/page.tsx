@@ -45,7 +45,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useGetProductsQuery } from "@/redux/features/product/productApi";
+import {
+  useDeleteProductMutation,
+  useGetProductsQuery,
+} from "@/redux/features/product/productApi";
 import type { IProduct } from "@/app/(public)/_components/products-section";
 import { categories } from "@/lib/constant";
 import {
@@ -80,6 +83,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import { toast } from "sonner";
 
 export default function ProductsPage() {
   const router = useRouter();
@@ -241,14 +245,21 @@ export default function ProductsPage() {
     </div>
   );
 
-  const handleConfirmDelete = () => {
-    // Here you would call your delete API
-    console.log("Deleting product:", productToDelete?._id);
-    // After successful deletion:
-    setIsDeleteDialogOpen(false);
-    setIsDeleteDrawerOpen(false);
-    setProductToDelete(null);
-    // You might want to refetch the products list here
+  const [deleteProduct, { isLoading: isProductDeleting }] =
+    useDeleteProductMutation();
+
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteProduct(productToDelete?._id);
+      toast.success("Product deleted successfully.");
+    } catch (error) {
+      console.error("Failed to delete product:", error);
+      toast.error("Failed to delete product.");
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setIsDeleteDrawerOpen(false);
+      setProductToDelete(null);
+    }
   };
 
   return (
@@ -618,11 +629,16 @@ export default function ProductsPage() {
               <Button
                 variant="outline"
                 onClick={() => setIsDeleteDialogOpen(false)}
+                disabled={isProductDeleting}
               >
                 Cancel
               </Button>
-              <Button variant="destructive" onClick={handleConfirmDelete}>
-                Delete Product
+              <Button
+                variant="destructive"
+                onClick={handleConfirmDelete}
+                disabled={isProductDeleting}
+              >
+                {isProductDeleting ? "Deleting..." : "Delete Product"}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -645,12 +661,17 @@ export default function ProductsPage() {
                 <Button
                   variant="outline"
                   onClick={() => setIsDeleteDrawerOpen(false)}
+                  disabled={isProductDeleting}
                 >
                   Cancel
                 </Button>
               </DrawerClose>
-              <Button variant="destructive" onClick={handleConfirmDelete}>
-                Delete Product
+              <Button
+                variant="destructive"
+                onClick={handleConfirmDelete}
+                disabled={isProductDeleting}
+              >
+                {isProductDeleting ? "Deleting..." : "Delete Product"}
               </Button>
             </DrawerFooter>
           </DrawerContent>
