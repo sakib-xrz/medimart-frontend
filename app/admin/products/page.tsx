@@ -47,6 +47,7 @@ import { useGetProductsQuery } from "@/redux/features/product/productApi";
 import type { IProduct } from "@/app/(public)/_components/products-section";
 import { categories } from "@/lib/constant";
 import {
+  cn,
   formatExpiryDate,
   generateQueryString,
   sanitizeParams,
@@ -375,7 +376,7 @@ export default function ProductsPage() {
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
                         <span
-                          className={`text-sm ${isExpired(product.expiry_date) ? "font-medium text-red-600" : ""}`}
+                          className={`text-sm ${isExpired(product.expiry_date) ? "font-medium text-destructive" : ""}`}
                         >
                           {formatExpiryDate(product.expiry_date)}
                         </span>
@@ -406,7 +407,13 @@ export default function ProductsPage() {
                       {/* Stock */}
                       <div className="h-[86px] flex-1 rounded-md bg-muted/50 p-3 text-center">
                         <p className="text-xs text-muted-foreground">Stock</p>
-                        <p className="text-lg font-semibold">{product.stock}</p>
+                        <p
+                          className={cn("text-lg font-semibold", {
+                            "text-destructive": !product.in_stock,
+                          })}
+                        >
+                          {product.stock}
+                        </p>
                         <p className="text-xs text-muted-foreground">units</p>
                       </div>
                     </div>
@@ -498,13 +505,19 @@ export default function ProductsPage() {
                     <TableCell className="hidden md:table-cell">
                       <span
                         className={
-                          isExpired(product.expiry_date) ? "text-red-600" : ""
+                          isExpired(product.expiry_date)
+                            ? "text-destructive"
+                            : ""
                         }
                       >
                         {formatExpiryDate(product.expiry_date)}
                       </span>
                     </TableCell>
-                    <TableCell className="hidden text-center md:table-cell">
+                    <TableCell
+                      className={cn("hidden text-center md:table-cell", {
+                        "text-destructive": !product.in_stock,
+                      })}
+                    >
                       {product.stock}
                     </TableCell>
                     <TableCell className="text-right">
