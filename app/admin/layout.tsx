@@ -47,7 +47,7 @@ export default function AdminLayout({
   };
 
   return (
-    <div className="flex h-screen bg-muted/30">
+    <div className="flex min-h-screen bg-muted/30">
       {/* Sidebar */}
       <AdminSidebar
         collapsed={sidebarCollapsed}

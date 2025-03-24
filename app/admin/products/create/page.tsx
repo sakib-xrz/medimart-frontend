@@ -109,7 +109,7 @@ export default function CreateProductPage() {
 
   useEffect(() => {
     formik.setFieldValue("in_stock", Number(formik.values.stock) > 0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line
   }, [formik.values.stock]);
 
   // Calculate discounted price

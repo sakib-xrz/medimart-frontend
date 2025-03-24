@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -30,8 +30,12 @@ import { format } from "date-fns";
 import Link from "next/link";
 import { categories, forms } from "@/lib/constant";
 import { cn } from "@/lib/utils";
-import { useGetProductDetailQuery } from "@/redux/features/product/productApi";
+import {
+  useGetProductDetailQuery,
+  useUpdateProductMutation,
+} from "@/redux/features/product/productApi";
 import { OverlayLoading } from "@/components/ui/overlay-loading";
+import { toast } from "sonner";
 
 // Form validation schema
 const validationSchema = Yup.object({
@@ -70,7 +74,9 @@ export default function EditProduct({
   });
 
   const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [updateProduct, { isLoading: isUpdatingProduct }] =
+    useUpdateProductMutation();
 
   const product = productData?.data;
 
@@ -93,16 +99,28 @@ export default function EditProduct({
     },
     validationSchema,
     onSubmit: async (values) => {
-      setIsSubmitting(true);
+      const payload = {
+        ...values,
+        price: Number(values.price),
+        stock: Number(values.stock),
+        discount: Number(values.discount),
+        expiry_date: format(values.expiry_date, "yyyy-MM-dd"),
+      };
 
-      // Simulate API call
-      console.log("Submitting product:", values);
+      try {
+        const response = await updateProduct({
+          id: product._id,
+          data: payload,
+        }).unwrap();
 
-      // Simulate delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Redirect to products page after successful creation
-      //   router.push("/admin/products");
+        if (response) {
+          toast.success("Product updated successfully.");
+          router.push("/admin/products");
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to update product.");
+      }
     },
   });
 
@@ -125,9 +143,13 @@ export default function EditProduct({
         in_stock: product.in_stock,
       });
     }
-
     // eslint-disable-next-line
   }, [product]);
+
+  useEffect(() => {
+    formik.setFieldValue("in_stock", Number(formik.values.stock) > 0);
+    // eslint-disable-next-line
+  }, [formik.values.stock]);
 
   // Calculate discounted price
   const calculateDiscountedPrice = () => {
@@ -536,9 +558,7 @@ export default function EditProduct({
                     id="in_stock"
                     name="in_stock"
                     checked={formik.values.in_stock}
-                    onCheckedChange={(checked) =>
-                      formik.setFieldValue("in_stock", checked)
-                    }
+                    disabled
                   />
                   <Label htmlFor="in_stock">In Stock</Label>
                 </div>
@@ -587,8 +607,8 @@ export default function EditProduct({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? (
+            <Button type="submit" disabled={isUpdatingProduct}>
+              {isUpdatingProduct ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Updating...
