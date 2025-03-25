@@ -41,6 +41,7 @@ import {
 import {
   useDeleteUserMutation,
   useGetCustomerQuery,
+  useUpdateUserStatusMutation,
 } from "@/redux/features/user/userApi";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from "use-debounce";
@@ -86,6 +87,9 @@ export default function CustomersPage() {
   );
   const [searchKey, setSearchKey] = useState(searchParams.get("search") || "");
 
+  const [updateUserStatus, { isLoading: isUserStatusUpdating }] =
+    useUpdateUserStatusMutation();
+
   const [params, setParams] = useState({
     search: searchParams.get("search") || "",
     status: searchParams.get("status") || "",
@@ -127,7 +131,16 @@ export default function CustomersPage() {
     debouncedSearch(value);
   };
 
-  // const handleStatusChange = (customerId: string, newStatus: string) => {};
+  const handleStatusChange = async (customerId: string, newStatus: string) => {
+    const payload = { status: newStatus };
+    try {
+      await updateUserStatus({ id: customerId, data: payload });
+      toast.success("User status updated successfully.");
+    } catch (error) {
+      console.error("Failed to update user status:", error);
+      toast.error("Failed to update user status.");
+    }
+  };
 
   const { data: customersData, isLoading: isCustomersLoading } =
     useGetCustomerQuery(sanitizeParams(modifyParams));
@@ -337,7 +350,10 @@ export default function CustomersPage() {
                     </div>
                     <Select
                       defaultValue={customer.status}
-                      // onValueChange={(value) => handleStatusChange(customer._id, value)}
+                      onValueChange={(value) =>
+                        handleStatusChange(customer._id, value)
+                      }
+                      disabled={isUserStatusUpdating}
                     >
                       <SelectTrigger className="w-[120px]">
                         <SelectValue />
@@ -388,7 +404,10 @@ export default function CustomersPage() {
                       <TableCell className="text-center">
                         <Select
                           defaultValue={customer.status}
-                          // onValueChange={(value) => handleStatusChange(customer._id, value)}
+                          onValueChange={(value) =>
+                            handleStatusChange(customer._id, value)
+                          }
+                          disabled={isUserStatusUpdating}
                         >
                           <SelectTrigger className="mx-auto w-[120px]">
                             <SelectValue />
