@@ -11,18 +11,23 @@ export const userApi = baseApi.injectEndpoints({
       }),
       providesTags: [tagTypes.user],
     }),
-    // updateUserStatus: builder.mutation({
-    //   query: (data) => ({
-    //     url: `/user`,
-    //     method: "PUT",
-    //     data,
-    //   }),
-    //   invalidatesTags: [tagTypes.user],
-    // }),
+    updateUserStatus: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `/users/${id}/status`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: [tagTypes.user],
+    }),
+    deleteUser: builder.mutation({
+      query: (id) => ({ url: `/users/${id}`, method: "DELETE" }),
+      invalidatesTags: [tagTypes.user],
+    }),
   }),
 });
 
 export const {
   useGetCustomerQuery,
-  // useUpdateUserStatusMutation,
+  useUpdateUserStatusMutation,
+  useDeleteUserMutation,
 } = userApi;
