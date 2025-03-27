@@ -65,6 +65,7 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { toast } from "sonner";
+import Link from "next/link";
 
 interface Customer {
   _id: string;
@@ -303,9 +304,13 @@ export default function CustomersPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-44">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem className="cursor-pointer">
-                          <ClipboardList className="mr-1 h-4 w-4" />
-                          View Orders
+                        <DropdownMenuItem className="cursor-pointer" asChild>
+                          <Link
+                            href={`/admin/orders?search=${customer.email}&page=1&limit=20`}
+                          >
+                            <ClipboardList className="mr-1 h-4 w-4" />
+                            View Orders
+                          </Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
@@ -428,9 +433,16 @@ export default function CustomersPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-44">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem className="cursor-pointer">
-                              <ClipboardList className="mr-1 h-4 w-4" />
-                              View Orders
+                            <DropdownMenuItem
+                              className="cursor-pointer"
+                              asChild
+                            >
+                              <Link
+                                href={`/admin/orders?search=${customer.email}&page=1&limit=20`}
+                              >
+                                <ClipboardList className="mr-1 h-4 w-4" />
+                                View Orders
+                              </Link>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
