@@ -43,6 +43,7 @@ import {
   ResponsiveContainer,
   ComposedChart,
 } from "recharts";
+import Link from "next/link";
 
 // Define types for the data
 type OrderStatusType =
@@ -466,8 +467,8 @@ export default function AdminDashboard(): JSX.Element {
               ))}
             </div>
             <div className="mt-4 text-center">
-              <Button variant="outline" size="sm">
-                View All Orders
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/admin/orders">View All Orders</Link>
               </Button>
             </div>
           </CardContent>

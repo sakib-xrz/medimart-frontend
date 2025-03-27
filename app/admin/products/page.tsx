@@ -92,8 +92,8 @@ export default function ProductsPage() {
 
   const [params, setParams] = useState({
     search: searchParams.get("search") || "",
-    in_stock: searchParams.get("in_stock") || "all",
-    category_slug: searchParams.get("category_slug") || "all",
+    in_stock: searchParams.get("in_stock") || "",
+    category_slug: searchParams.get("category_slug") || "",
     page: Number(searchParams.get("page")) || 1,
     limit: Number(searchParams.get("limit")) || 20,
   });

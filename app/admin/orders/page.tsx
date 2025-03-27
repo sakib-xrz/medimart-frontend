@@ -138,8 +138,8 @@ export default function OrdersPage() {
 
   const [params, setParams] = useState({
     search: searchParams.get("search") || "",
-    order_status: searchParams.get("order_status") || "all",
-    payment_status: searchParams.get("payment_status") || "all",
+    order_status: searchParams.get("order_status") || "",
+    payment_status: searchParams.get("payment_status") || "",
     page: Number(searchParams.get("page")) || 1,
     limit: Number(searchParams.get("limit")) || 20,
   });
