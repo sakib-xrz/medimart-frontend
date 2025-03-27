@@ -38,8 +38,12 @@ import { cn, generateQueryString, sanitizeParams } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from "use-debounce";
-import { useGetAllOrdersQuery } from "@/redux/features/order/orderApi";
+import {
+  useGetAllOrdersQuery,
+  useUpdateOrderStatusMutation,
+} from "@/redux/features/order/orderApi";
 import CustomPagination from "@/app/(public)/_components/custom-pagination";
+import { toast } from "sonner";
 
 // Order status options
 const ORDER_STATUSES = [
@@ -136,6 +140,9 @@ export default function OrdersPage() {
   const searchParams = useSearchParams();
   const [searchKey, setSearchKey] = useState(searchParams.get("search") || "");
 
+  const [updateOrderStatus, { isLoading: isUpdatingOrderStatus }] =
+    useUpdateOrderStatusMutation();
+
   const [params, setParams] = useState({
     search: searchParams.get("search") || "",
     order_status: searchParams.get("order_status") || "",
@@ -190,8 +197,6 @@ export default function OrdersPage() {
 
   const orders = ordersData?.data || [];
   const meta = ordersData?.meta || {};
-
-  console.log(orders);
 
   const totalPages = Math.ceil(meta.total / meta.limit);
 
@@ -310,6 +315,17 @@ export default function OrdersPage() {
       </Button>
     </div>
   );
+
+  const handleOrderStatusChange = async (orderId: string, status: string) => {
+    try {
+      await updateOrderStatus({ id: orderId, status }).unwrap();
+      toast.success("Order status updated successfully");
+    } catch (error) {
+      console.error(error);
+      // @ts-expect-error - error has data property
+      toast.error(error?.data?.message || "Failed to update order status");
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -439,9 +455,10 @@ export default function OrdersPage() {
                       <TableCell className="flex justify-center text-center">
                         <Select
                           value={order.order_status}
-                          // onValueChange={(value) =>
-                          //   handleOrderStatusChange(order._id, value)
-                          // }
+                          onValueChange={(value) =>
+                            handleOrderStatusChange(order._id, value)
+                          }
+                          disabled={isUpdatingOrderStatus}
                         >
                           <SelectTrigger className="w-[130px]">
                             <SelectValue placeholder="Order Status" />
@@ -602,9 +619,10 @@ export default function OrdersPage() {
                       <div className="text-sm font-medium">Order Status</div>
                       <Select
                         value={order.order_status}
-                        // onValueChange={(value) =>
-                        //   handleOrderStatusChange(order._id, value)
-                        // }
+                        onValueChange={(value) =>
+                          handleOrderStatusChange(order._id, value)
+                        }
+                        disabled={isUpdatingOrderStatus}
                       >
                         <SelectTrigger className="w-[130px]">
                           <SelectValue placeholder="Order Status" />
