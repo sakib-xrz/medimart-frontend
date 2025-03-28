@@ -44,6 +44,8 @@ import {
   ComposedChart,
 } from "recharts";
 import Link from "next/link";
+import { useGetStatsSummeryQuery } from "@/redux/features/dashboard/dashboardApi";
+import { OverlayLoading } from "@/components/ui/overlay-loading";
 
 // Define types for the data
 type OrderStatusType =
@@ -188,6 +190,19 @@ const chartConfig: {
   },
 };
 
+//  {
+//         "total_revenue": 665.5,
+//         "total_orders": 4,
+//         "total_customers": 2,
+//         "active_products": 110,
+//         "comparisons": {
+//             "revenue_growth": 100,
+//             "orders_growth": 100,
+//             "customers_growth": 100,
+//             "products_growth": 100
+//         }
+//     }
+
 // Helper function to get status badge
 const getOrderStatusBadge = (status: OrderStatusType): JSX.Element => {
   switch (status) {
@@ -233,6 +248,9 @@ const getOrderStatusBadge = (status: OrderStatusType): JSX.Element => {
 export default function AdminDashboard(): JSX.Element {
   const [isMobile, setIsMobile] = useState(false);
 
+  const { data: orderStatsData, isLoading: orderStatsLoading } =
+    useGetStatsSummeryQuery({});
+
   useEffect(() => {
     // Check if window is defined (client-side)
     if (typeof window !== "undefined") {
@@ -269,8 +287,11 @@ export default function AdminDashboard(): JSX.Element {
     );
   }
 
+  const orderStats = orderStatsData?.data || {};
+
   return (
     <div className="w-full space-y-6">
+      <OverlayLoading isLoading={orderStatsLoading} />
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -289,12 +310,21 @@ export default function AdminDashboard(): JSX.Element {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">BDT 45,231.89</div>
+            <div className="text-2xl font-bold">
+              BDT {orderStats?.total_revenue?.toLocaleString()}
+            </div>
             <div className="flex items-center pt-1">
-              <span className="flex items-center text-xs text-green-500">
-                <ArrowUp className="mr-1 h-3 w-3" />
-                +20.1%
-              </span>
+              {orderStats?.comparisons?.revenue_growth > 0 ? (
+                <span className="flex items-center text-xs text-green-500">
+                  <ArrowUp className="mr-1 h-3 w-3" />+
+                  {orderStats?.comparisons?.revenue_growth}%
+                </span>
+              ) : (
+                <span className="flex items-center text-xs text-red-500">
+                  <ArrowDown className="mr-1 h-3 w-3" />
+                  {orderStats?.comparisons?.revenue_growth}%
+                </span>
+              )}
               <span className="ml-2 text-xs text-muted-foreground">
                 from last month
               </span>
@@ -307,12 +337,21 @@ export default function AdminDashboard(): JSX.Element {
             <ShoppingCart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">573</div>
+            <div className="text-2xl font-bold">
+              {orderStats?.total_orders?.toLocaleString()}
+            </div>
             <div className="flex items-center pt-1">
-              <span className="flex items-center text-xs text-green-500">
-                <ArrowUp className="mr-1 h-3 w-3" />
-                +12.2%
-              </span>
+              {orderStats?.comparisons?.orders_growth > 0 ? (
+                <span className="flex items-center text-xs text-green-500">
+                  <ArrowUp className="mr-1 h-3 w-3" />+
+                  {orderStats?.comparisons?.orders_growth}%
+                </span>
+              ) : (
+                <span className="flex items-center text-xs text-red-500">
+                  <ArrowDown className="mr-1 h-3 w-3" />
+                  {orderStats?.comparisons?.orders_growth}%
+                </span>
+              )}
               <span className="ml-2 text-xs text-muted-foreground">
                 from last month
               </span>
@@ -325,12 +364,21 @@ export default function AdminDashboard(): JSX.Element {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">2,350</div>
+            <div className="text-2xl font-bold">
+              {orderStats?.total_customers?.toLocaleString()}
+            </div>
             <div className="flex items-center pt-1">
-              <span className="flex items-center text-xs text-green-500">
-                <ArrowUp className="mr-1 h-3 w-3" />
-                +18.7%
-              </span>
+              {orderStats?.comparisons?.customers_growth > 0 ? (
+                <span className="flex items-center text-xs text-green-500">
+                  <ArrowUp className="mr-1 h-3 w-3" />+
+                  {orderStats?.comparisons?.customers_growth}%
+                </span>
+              ) : (
+                <span className="flex items-center text-xs text-red-500">
+                  <ArrowDown className="mr-1 h-3 w-3" />
+                  {orderStats?.comparisons?.customers_growth}%
+                </span>
+              )}
               <span className="ml-2 text-xs text-muted-foreground">
                 from last month
               </span>
@@ -345,12 +393,21 @@ export default function AdminDashboard(): JSX.Element {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">12,234</div>
+            <div className="text-2xl font-bold">
+              {orderStats?.active_products?.toLocaleString()}
+            </div>
             <div className="flex items-center pt-1">
-              <span className="flex items-center text-xs text-red-500">
-                <ArrowDown className="mr-1 h-3 w-3" />
-                -2.5%
-              </span>
+              {orderStats?.comparisons?.products_growth > 0 ? (
+                <span className="flex items-center text-xs text-green-500">
+                  <ArrowUp className="mr-1 h-3 w-3" />+
+                  {orderStats?.comparisons?.products_growth}%
+                </span>
+              ) : (
+                <span className="flex items-center text-xs text-red-500">
+                  <ArrowDown className="mr-1 h-3 w-3" />
+                  {orderStats?.comparisons?.products_growth}%
+                </span>
+              )}
               <span className="ml-2 text-xs text-muted-foreground">
                 from last month
               </span>
