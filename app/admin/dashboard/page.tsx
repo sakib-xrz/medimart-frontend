@@ -61,7 +61,7 @@ interface RevenueData {
 }
 
 interface RecentOrder {
-  id: string;
+  order_id: string;
   customer: string;
   date: string;
   total: number;
@@ -111,7 +111,7 @@ const revenueData: RevenueData[] = [
 
 const recentOrders: RecentOrder[] = [
   {
-    id: "ORD-5123",
+    order_id: "ORD-5123",
     customer: "Ahmed Khan",
     date: "2023-11-20",
     total: 1250,
@@ -119,7 +119,7 @@ const recentOrders: RecentOrder[] = [
     items: 3,
   },
   {
-    id: "ORD-5122",
+    order_id: "ORD-5122",
     customer: "Fatima Rahman",
     date: "2023-11-20",
     total: 850,
@@ -127,7 +127,7 @@ const recentOrders: RecentOrder[] = [
     items: 2,
   },
   {
-    id: "ORD-5121",
+    order_id: "ORD-5121",
     customer: "Mohammad Ali",
     date: "2023-11-19",
     total: 2100,
@@ -135,7 +135,7 @@ const recentOrders: RecentOrder[] = [
     items: 5,
   },
   {
-    id: "ORD-5120",
+    order_id: "ORD-5120",
     customer: "Nusrat Jahan",
     date: "2023-11-19",
     total: 450,
@@ -143,7 +143,7 @@ const recentOrders: RecentOrder[] = [
     items: 1,
   },
   {
-    id: "ORD-5119",
+    order_id: "ORD-5119",
     customer: "Kamal Hossain",
     date: "2023-11-18",
     total: 1800,
@@ -189,19 +189,6 @@ const chartConfig: {
     },
   },
 };
-
-//  {
-//         "total_revenue": 665.5,
-//         "total_orders": 4,
-//         "total_customers": 2,
-//         "active_products": 110,
-//         "comparisons": {
-//             "revenue_growth": 100,
-//             "orders_growth": 100,
-//             "customers_growth": 100,
-//             "products_growth": 100
-//         }
-//     }
 
 // Helper function to get status badge
 const getOrderStatusBadge = (status: OrderStatusType): JSX.Element => {
@@ -497,13 +484,13 @@ export default function AdminDashboard(): JSX.Element {
           <CardContent>
             <div className="space-y-4">
               {recentOrders.map((order) => (
-                <div key={order.id} className="flex items-center gap-4">
+                <div key={order.order_id} className="flex items-center gap-4">
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
                     <CreditCard className="h-4 w-4 text-primary" />
                   </div>
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center">
-                      <p className="text-sm font-medium">{order.id}</p>
+                      <p className="text-sm font-medium">{order.order_id}</p>
                       <div className="ml-2">
                         {getOrderStatusBadge(order.status)}
                       </div>
@@ -519,6 +506,16 @@ export default function AdminDashboard(): JSX.Element {
                     <p className="text-xs text-muted-foreground">
                       {new Date(order.date).toLocaleDateString()}
                     </p>
+                  </div>
+
+                  <div>
+                    <Button variant="outline" size="sm" asChild>
+                      <Link
+                        href={`/admin/orders?search=${order.order_id}&page=1&limit=20`}
+                      >
+                        View Details
+                      </Link>
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -595,9 +592,9 @@ export default function AdminDashboard(): JSX.Element {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Expiring Soon</CardTitle>
+              <CardTitle>Expiring Products</CardTitle>
               <CardDescription>
-                Products expiring within 30 days
+                Products are already expired or will expire soon
               </CardDescription>
             </div>
           </CardHeader>
