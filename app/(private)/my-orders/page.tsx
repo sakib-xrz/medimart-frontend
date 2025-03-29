@@ -32,6 +32,7 @@ import { useMyOrdersQuery } from "@/redux/features/order/orderApi";
 import { formatDate } from "@/lib/utils";
 import Container from "@/components/shared/container";
 import { DataLoading } from "@/components/ui/data-loading";
+import { useCreatePaymentIntentMutation } from "@/redux/features/payment/paymentApi";
 
 type OrderStatus =
   | "PLACED"
@@ -166,6 +167,17 @@ export default function MyOrders() {
 
   const orders = myOrdersData?.data;
 
+  const [createPaymentIntent, { isLoading: isCreatingPaymentIntent }] =
+    useCreatePaymentIntentMutation();
+
+  const handlePayNow = async (orderId: string) => {
+    const paymentRes = await createPaymentIntent(orderId).unwrap();
+    if (paymentRes.success) {
+      const paymentIntent = paymentRes.data;
+      window.location.href = paymentIntent.paymentURL;
+    }
+  };
+
   return (
     <main className="bg-muted/30">
       <Container>
@@ -247,6 +259,19 @@ export default function MyOrders() {
                             </>
                           )}
                         </Button>
+
+                        {order.payment_status !== "PAID" &&
+                          order.order_status !== "CANCELLED" &&
+                          order.order_status !== "DELIVERED" && (
+                            <Button
+                              size="sm"
+                              variant="default"
+                              onClick={() => handlePayNow(order._id)}
+                              disabled={isCreatingPaymentIntent}
+                            >
+                              Pay Now
+                            </Button>
+                          )}
                       </div>
                     </div>
 

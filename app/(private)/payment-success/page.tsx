@@ -17,14 +17,7 @@ import { useDispatch } from "react-redux";
 import { useEffect } from "react";
 import { clearCart } from "@/redux/features/cart/cartSlice";
 
-export default function PaymentSuccess({
-  searchParams,
-}: {
-  searchParams: {
-    order_id: string;
-  };
-}) {
-  const orderId = searchParams?.order_id;
+export default function PaymentSuccess() {
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -49,13 +42,6 @@ export default function PaymentSuccess({
               Thank you for your order. We&apos;ve received your payment and
               will process your order shortly.
             </p>
-
-            <div className="rounded-lg bg-muted p-4">
-              <div className="flex justify-between">
-                <span className="font-medium">Order ID:</span>
-                <span className="font-medium">#{orderId}</span>
-              </div>
-            </div>
 
             <div className="space-y-2">
               <h3 className="font-medium">What happens next?</h3>
@@ -109,7 +95,7 @@ export default function PaymentSuccess({
             <Button asChild className="w-full">
               <Link href="/my-orders">
                 <Package className="mr-2 h-4 w-4" />
-                Track Your Order
+                View My Orders
               </Link>
             </Button>
             <Button variant="outline" asChild className="w-full">
