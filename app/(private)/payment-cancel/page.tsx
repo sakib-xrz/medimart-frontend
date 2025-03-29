@@ -16,14 +16,31 @@ import Container from "@/components/shared/container";
 import { useDispatch } from "react-redux";
 import { useEffect } from "react";
 import { clearCart } from "@/redux/features/cart/cartSlice";
+import { useCreatePaymentIntentMutation } from "@/redux/features/payment/paymentApi";
 
-export default function PaymentCancel() {
+export default function PaymentCancel({
+  searchParams: { order_id },
+}: {
+  searchParams: { order_id: string };
+}) {
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(clearCart());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const [createPaymentIntent, { isLoading: isCreatingPaymentIntent }] =
+    useCreatePaymentIntentMutation();
+
+  const handlePayNow = async (orderId: string) => {
+    const paymentRes = await createPaymentIntent(orderId).unwrap();
+    if (paymentRes.success) {
+      const paymentIntent = paymentRes.data;
+      window.location.href = paymentIntent.paymentURL;
+    }
+  };
+
   return (
     <main className="bg-muted/30">
       <Container>
@@ -76,13 +93,15 @@ export default function PaymentCancel() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-2">
-            <Button asChild className="w-full">
-              <Link href="/products">
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Retry Payment
-              </Link>
+            <Button
+              className="w-full"
+              onClick={() => handlePayNow(order_id)}
+              disabled={isCreatingPaymentIntent}
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Retry Payment
             </Button>
-            <Button variant="ghost" asChild className="w-full">
+            <Button variant="secondary" asChild className="w-full">
               <Link href="/products">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Continue Shopping

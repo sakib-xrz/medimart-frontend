@@ -29,10 +29,10 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { useMyOrdersQuery } from "@/redux/features/order/orderApi";
-import { formatDate } from "@/lib/utils";
 import Container from "@/components/shared/container";
 import { DataLoading } from "@/components/ui/data-loading";
 import { useCreatePaymentIntentMutation } from "@/redux/features/payment/paymentApi";
+import { format } from "date-fns";
 
 type OrderStatus =
   | "PLACED"
@@ -216,7 +216,10 @@ export default function MyOrders() {
                         </CardTitle>
                         <CardDescription className="mt-1 flex items-center">
                           <Calendar className="mr-1 h-3.5 w-3.5 text-muted-foreground" />
-                          <span>Placed on {formatDate(order.createdAt)}</span>
+                          <span>
+                            Placed on{" "}
+                            {format(order.createdAt, "dd MMM, yyyy - hh:mm a")}
+                          </span>
                         </CardDescription>
                       </div>
                       <div className="flex flex-wrap gap-2">
