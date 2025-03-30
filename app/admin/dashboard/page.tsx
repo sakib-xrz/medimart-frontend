@@ -44,7 +44,13 @@ import {
   ComposedChart,
 } from "recharts";
 import Link from "next/link";
-import { useGetStatsSummeryQuery } from "@/redux/features/dashboard/dashboardApi";
+import {
+  useGetExpiringProductsQuery,
+  useGetLowStockProductsQuery,
+  useGetRecentOrdersQuery,
+  useGetRevenueSummaryQuery,
+  useGetStatsSummeryQuery,
+} from "@/redux/features/dashboard/dashboardApi";
 import { OverlayLoading } from "@/components/ui/overlay-loading";
 
 // Define types for the data
@@ -55,32 +61,27 @@ type OrderStatusType =
   | "DELIVERED"
   | "CANCELLED";
 
-interface RevenueData {
-  month: string;
-  revenue: number;
-}
-
 interface RecentOrder {
+  _id: string;
   order_id: string;
-  customer: string;
-  date: string;
-  total: number;
-  status: OrderStatusType;
-  items: number;
+  customer_name: string;
+  grand_total: number;
+  order_status: OrderStatusType;
+  createdAt: string;
 }
 
 interface LowStockProduct {
-  id: string;
+  _id: string;
   name: string;
+  slug: string;
   stock: number;
-  threshold: number;
 }
 
 interface ExpiringProduct {
-  id: string;
+  _id: string;
   name: string;
-  expiryDate: string;
-  stock: number;
+  slug: string;
+  expiry_date: string;
 }
 
 interface ChartTheme {
@@ -92,91 +93,6 @@ interface ChartConfig {
   label: string;
   theme: ChartTheme;
 }
-
-// Sample data
-const revenueData: RevenueData[] = [
-  { month: "Jan", revenue: 18500 },
-  { month: "Feb", revenue: 21500 },
-  { month: "Mar", revenue: 19800 },
-  { month: "Apr", revenue: 22500 },
-  { month: "May", revenue: 25300 },
-  { month: "Jun", revenue: 28900 },
-  { month: "Jul", revenue: 27200 },
-  { month: "Aug", revenue: 32100 },
-  { month: "Sep", revenue: 35800 },
-  { month: "Oct", revenue: 39500 },
-  { month: "Nov", revenue: 42100 },
-  { month: "Dec", revenue: 45200 },
-];
-
-const recentOrders: RecentOrder[] = [
-  {
-    order_id: "ORD-5123",
-    customer: "Ahmed Khan",
-    date: "2023-11-20",
-    total: 1250,
-    status: "CONFIRMED",
-    items: 3,
-  },
-  {
-    order_id: "ORD-5122",
-    customer: "Fatima Rahman",
-    date: "2023-11-20",
-    total: 850,
-    status: "PLACED",
-    items: 2,
-  },
-  {
-    order_id: "ORD-5121",
-    customer: "Mohammad Ali",
-    date: "2023-11-19",
-    total: 2100,
-    status: "SHIPPED",
-    items: 5,
-  },
-  {
-    order_id: "ORD-5120",
-    customer: "Nusrat Jahan",
-    date: "2023-11-19",
-    total: 450,
-    status: "DELIVERED",
-    items: 1,
-  },
-  {
-    order_id: "ORD-5119",
-    customer: "Kamal Hossain",
-    date: "2023-11-18",
-    total: 1800,
-    status: "CANCELLED",
-    items: 4,
-  },
-];
-
-const lowStockProducts: LowStockProduct[] = [
-  { id: "PROD-001", name: "Paracetamol 500mg", stock: 8, threshold: 10 },
-  { id: "PROD-015", name: "Vitamin D3 1000IU", stock: 5, threshold: 15 },
-  {
-    id: "PROD-023",
-    name: "Blood Glucose Test Strips",
-    stock: 12,
-    threshold: 20,
-  },
-];
-
-const expiringProducts: ExpiringProduct[] = [
-  {
-    id: "PROD-007",
-    name: "Amoxicillin 500mg",
-    expiryDate: "2023-12-15",
-    stock: 45,
-  },
-  {
-    id: "PROD-019",
-    name: "Insulin 100IU/ml",
-    expiryDate: "2023-12-20",
-    stock: 18,
-  },
-];
 
 const chartConfig: {
   revenue: ChartConfig;
@@ -235,8 +151,16 @@ const getOrderStatusBadge = (status: OrderStatusType): JSX.Element => {
 export default function AdminDashboard(): JSX.Element {
   const [isMobile, setIsMobile] = useState(false);
 
-  const { data: orderStatsData, isLoading: orderStatsLoading } =
+  const { data: statsSummaryData, isLoading: statsSummaryLoading } =
     useGetStatsSummeryQuery({});
+  const { data: revenueSummaryData, isLoading: revenueSummaryLoading } =
+    useGetRevenueSummaryQuery({});
+  const { data: recentOrdersData, isLoading: recentOrdersLoading } =
+    useGetRecentOrdersQuery({});
+  const { data: lowStockProductsData, isLoading: lowStockProductsLoading } =
+    useGetLowStockProductsQuery({});
+  const { data: expiringProductsData, isLoading: expiringProductsLoading } =
+    useGetExpiringProductsQuery({});
 
   useEffect(() => {
     // Check if window is defined (client-side)
@@ -274,11 +198,23 @@ export default function AdminDashboard(): JSX.Element {
     );
   }
 
-  const orderStats = orderStatsData?.data || {};
+  const statsSummary = statsSummaryData?.data || {};
+  const revenueSummary = revenueSummaryData?.data || {};
+  const recentOrders = recentOrdersData?.data || [];
+  const lowStockProducts = lowStockProductsData?.data || [];
+  const expiringProducts = expiringProductsData?.data || [];
 
   return (
     <div className="w-full space-y-6">
-      <OverlayLoading isLoading={orderStatsLoading} />
+      <OverlayLoading
+        isLoading={
+          statsSummaryLoading ||
+          revenueSummaryLoading ||
+          recentOrdersLoading ||
+          lowStockProductsLoading ||
+          expiringProductsLoading
+        }
+      />
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -298,18 +234,18 @@ export default function AdminDashboard(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              BDT {orderStats?.total_revenue?.toLocaleString()}
+              BDT {statsSummary?.total_revenue?.toLocaleString()}
             </div>
             <div className="flex items-center pt-1">
-              {orderStats?.comparisons?.revenue_growth > 0 ? (
+              {statsSummary?.comparisons?.revenue_growth > 0 ? (
                 <span className="flex items-center text-xs text-green-500">
                   <ArrowUp className="mr-1 h-3 w-3" />+
-                  {orderStats?.comparisons?.revenue_growth}%
+                  {statsSummary?.comparisons?.revenue_growth}%
                 </span>
               ) : (
                 <span className="flex items-center text-xs text-red-500">
                   <ArrowDown className="mr-1 h-3 w-3" />
-                  {orderStats?.comparisons?.revenue_growth}%
+                  {statsSummary?.comparisons?.revenue_growth}%
                 </span>
               )}
               <span className="ml-2 text-xs text-muted-foreground">
@@ -325,18 +261,18 @@ export default function AdminDashboard(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {orderStats?.total_orders?.toLocaleString()}
+              {statsSummary?.total_orders?.toLocaleString()}
             </div>
             <div className="flex items-center pt-1">
-              {orderStats?.comparisons?.orders_growth > 0 ? (
+              {statsSummary?.comparisons?.orders_growth > 0 ? (
                 <span className="flex items-center text-xs text-green-500">
                   <ArrowUp className="mr-1 h-3 w-3" />+
-                  {orderStats?.comparisons?.orders_growth}%
+                  {statsSummary?.comparisons?.orders_growth}%
                 </span>
               ) : (
                 <span className="flex items-center text-xs text-red-500">
                   <ArrowDown className="mr-1 h-3 w-3" />
-                  {orderStats?.comparisons?.orders_growth}%
+                  {statsSummary?.comparisons?.orders_growth}%
                 </span>
               )}
               <span className="ml-2 text-xs text-muted-foreground">
@@ -352,18 +288,18 @@ export default function AdminDashboard(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {orderStats?.total_customers?.toLocaleString()}
+              {statsSummary?.total_customers?.toLocaleString()}
             </div>
             <div className="flex items-center pt-1">
-              {orderStats?.comparisons?.customers_growth > 0 ? (
+              {statsSummary?.comparisons?.customers_growth > 0 ? (
                 <span className="flex items-center text-xs text-green-500">
                   <ArrowUp className="mr-1 h-3 w-3" />+
-                  {orderStats?.comparisons?.customers_growth}%
+                  {statsSummary?.comparisons?.customers_growth}%
                 </span>
               ) : (
                 <span className="flex items-center text-xs text-red-500">
                   <ArrowDown className="mr-1 h-3 w-3" />
-                  {orderStats?.comparisons?.customers_growth}%
+                  {statsSummary?.comparisons?.customers_growth}%
                 </span>
               )}
               <span className="ml-2 text-xs text-muted-foreground">
@@ -381,18 +317,18 @@ export default function AdminDashboard(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {orderStats?.active_products?.toLocaleString()}
+              {statsSummary?.active_products?.toLocaleString()}
             </div>
             <div className="flex items-center pt-1">
-              {orderStats?.comparisons?.products_growth > 0 ? (
+              {statsSummary?.comparisons?.products_growth > 0 ? (
                 <span className="flex items-center text-xs text-green-500">
                   <ArrowUp className="mr-1 h-3 w-3" />+
-                  {orderStats?.comparisons?.products_growth}%
+                  {statsSummary?.comparisons?.products_growth}%
                 </span>
               ) : (
                 <span className="flex items-center text-xs text-red-500">
                   <ArrowDown className="mr-1 h-3 w-3" />
-                  {orderStats?.comparisons?.products_growth}%
+                  {statsSummary?.comparisons?.products_growth}%
                 </span>
               )}
               <span className="ml-2 text-xs text-muted-foreground">
@@ -420,7 +356,7 @@ export default function AdminDashboard(): JSX.Element {
             <div className="h-[340px]">
               <ChartContainer config={chartConfig} className="h-[340px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={revenueData}>
+                  <ComposedChart data={revenueSummary}>
                     <defs>
                       <linearGradient
                         id="colorRevenue"
@@ -483,28 +419,28 @@ export default function AdminDashboard(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentOrders.map((order) => (
-                <div key={order.order_id} className="flex items-center gap-4">
+              {recentOrders.map((order: RecentOrder) => (
+                <div key={order._id} className="flex items-center gap-4">
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
                     <CreditCard className="h-4 w-4 text-primary" />
                   </div>
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center">
-                      <p className="text-sm font-medium">{order.order_id}</p>
+                      <p className="text-sm font-medium">#{order.order_id}</p>
                       <div className="ml-2">
-                        {getOrderStatusBadge(order.status)}
+                        {getOrderStatusBadge(order.order_status)}
                       </div>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {order.customer}
+                      {order.customer_name}
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-medium">
-                      BDT {order.total.toLocaleString()}
+                      BDT {order.grand_total.toLocaleString()}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {new Date(order.date).toLocaleDateString()}
+                      {new Date(order.createdAt).toLocaleDateString()}
                     </p>
                   </div>
 
@@ -559,10 +495,10 @@ export default function AdminDashboard(): JSX.Element {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {lowStockProducts.map((product) => (
-                    <TableRow key={product.id}>
-                      <TableCell className="whitespace-nowrap font-medium">
-                        {product.id}
+                  {lowStockProducts.map((product: LowStockProduct) => (
+                    <TableRow key={product._id}>
+                      <TableCell className="whitespace-nowrap font-medium uppercase">
+                        {product.slug}
                       </TableCell>
                       <TableCell className="whitespace-nowrap">
                         {product.name}
@@ -576,8 +512,10 @@ export default function AdminDashboard(): JSX.Element {
                         </Badge>
                       </TableCell>
                       <TableCell className="whitespace-nowrap text-right">
-                        <Button size="sm" variant="outline">
-                          Restock
+                        <Button size="sm" variant="outline" asChild>
+                          <Link href={`/admin/products/${product.slug}/edit`}>
+                            Restock
+                          </Link>
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -616,10 +554,10 @@ export default function AdminDashboard(): JSX.Element {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {expiringProducts.map((product) => (
-                    <TableRow key={product.id}>
-                      <TableCell className="whitespace-nowrap font-medium">
-                        {product.id}
+                  {expiringProducts.map((product: ExpiringProduct) => (
+                    <TableRow key={product._id}>
+                      <TableCell className="whitespace-nowrap font-medium uppercase">
+                        {product.slug}
                       </TableCell>
                       <TableCell className="whitespace-nowrap">
                         {product.name}
@@ -629,12 +567,14 @@ export default function AdminDashboard(): JSX.Element {
                           variant="outline"
                           className="border-red-200 bg-red-50 text-red-700"
                         >
-                          {new Date(product.expiryDate).toLocaleDateString()}
+                          {new Date(product.expiry_date).toLocaleDateString()}
                         </Badge>
                       </TableCell>
                       <TableCell className="whitespace-nowrap text-right">
-                        <Button size="sm" variant="outline">
-                          Manage
+                        <Button size="sm" variant="outline" asChild>
+                          <Link href={`/admin/products/${product.slug}/edit`}>
+                            Manage
+                          </Link>
                         </Button>
                       </TableCell>
                     </TableRow>
