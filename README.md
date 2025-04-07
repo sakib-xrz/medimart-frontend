@@ -1,36 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 💊 [Medi Mart](https://medimart-self.vercel.app) - Online Pharmacy E-commerce Platform
 
-## Getting Started
+## 📌 Project Overview
 
-First, run the development server:
+Medi Mart is a **comprehensive online pharmacy platform** designed to provide a seamless experience for purchasing medications and healthcare products. The application features **user authentication, prescription management, secure checkout, and a robust admin dashboard** for inventory and order management. Built with **Next.js, TypeScript, and Tailwind CSS**, Medi Mart offers a responsive, accessible, and user-friendly interface for customers seeking healthcare products online.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🔥 **Key Features & Functionalities**
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### **🌍 Public Features (Accessible to All)**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+✅ **User Registration & Authentication**
 
-## Learn More
+- Secure **login and signup** system
+- Password management with validation
+- User profile management
 
-To learn more about Next.js, take a look at the following resources:
+✅ **Home Page**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Responsive Navbar**: Logo, navigation, cart, and user account access
+- **Hero Section**: Engaging banner highlighting key offerings
+- **Featured Products**: Showcases popular medical products
+- **Categories Section**: Easy navigation through product categories
+- **Testimonials**: Customer reviews and feedback
+- **CTA Section**: Encourages users to explore more products
+- **Footer**: Comprehensive links, contact information, and newsletter signup
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+✅ **Products Browsing**
 
-## Deploy on Vercel
+- **Advanced Filtering**: Filter by category, form, price range, prescription requirements
+- **Search Functionality**: Find products by name or description
+- **Pagination**: Navigate through product listings efficiently
+- **Responsive Grid Layout**: Adapts to different screen sizes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+✅ **Product Details**
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Comprehensive Information**: Detailed product descriptions, dosage, usage instructions
+- **Price Information**: Clear pricing with discount calculations
+- **Availability Status**: Stock information and expiry dates
+- **Prescription Requirements**: Clearly marked prescription-only medications
+- **Related Products**: Alternative or complementary products
+
+✅ **Shopping Cart**
+
+- **Real-time Updates**: Add, remove, and update quantities
+- **Price Calculations**: Automatic subtotal and discount calculations
+- **Prescription Validation**: Warnings for prescription-required items
+- **Stock Validation**: Prevents ordering expired or out-of-stock items
+
+---
+
+### **🔐 Private Features (Protected Routes)**
+
+✅ **Checkout Process**
+
+- **Shipping Information**: Comprehensive address collection
+- **Prescription Upload**: For prescription-required medications
+- **Payment Integration**: Secure payment processing via SSLCOMMERZ
+- **Order Summary**: Clear breakdown of items and costs
+
+✅ **User Account Management**
+
+- **Order History**: View past orders and their status
+- **Profile Management**: Update personal information
+- **Password Management**: Secure password changing functionality
+
+✅ **Admin Dashboard**
+
+- **Overview Dashboard**:
+  - Sales analytics and key performance indicators
+  - Recent orders and inventory alerts
+- **Order Management**:
+  - View and process customer orders
+  - Update order status and payment status
+  - View order details including products and customer information
+- **Product Management**:
+  - Add, edit, and delete products
+  - Manage inventory, pricing, and discounts
+  - Handle prescription requirements and expiry dates
+- **Customer Management**:
+  - View and manage customer accounts
+  - Track customer orders and spending
+
+---
+
+## 🖥️ **Technology Stack**
+
+### Frontend
+
+- **Framework**: Next.js 14 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS, shadcn/ui components
+- **State Management**: Redux Toolkit, RTK Query
+- **Form Handling**: Formik, Yup validation
+- **Data Visualization**: Recharts
+
+### Backend
+
+- **Framework**: Express.js
+- **Database**: MongoDB with Mongoose
+- **Authentication**: JWT (JSON Web Token)
+- **File Storage**: Cloudinary for prescription uploads
+- **Payment Processing**: SSLCOMMERZ integration
