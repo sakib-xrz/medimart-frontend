@@ -132,6 +132,8 @@ export default function CreateProductPage() {
     discountedPrice < Number.parseFloat(String(formik.values.price || "0"));
 
   const handleDateChange = (date: Date | undefined) => {
+    console.log(date);
+
     if (date) {
       formik.setFieldValue("expiry_date", date);
     }
