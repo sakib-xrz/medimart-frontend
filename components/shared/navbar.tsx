@@ -203,8 +203,8 @@ export function Navbar() {
                   {user.email}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer">
-                  Profile
+                <DropdownMenuItem className="cursor-pointer" asChild>
+                  <Link href="/profile">Profile</Link>
                 </DropdownMenuItem>
                 {user.role === "ADMIN" && (
                   <DropdownMenuItem className="cursor-pointer" asChild>
