@@ -1,4 +1,4 @@
-# 💊 [Medi Mart](https://medimart-self.vercel.app) - Online Pharmacy E-commerce Platform
+# 💊 [Medi Mart](https://medimart-shop.vercel.app) - Online Pharmacy E-commerce Platform
 
 ## 📌 Project Overview
 
