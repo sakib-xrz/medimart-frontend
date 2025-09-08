@@ -61,7 +61,7 @@ export default function AdminHeader({ onMenuClick }: AdminHeaderProps) {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem className="cursor-pointer">
-            Profile
+            <Link href="/profile">Profile</Link>
           </DropdownMenuItem>
           <DropdownMenuItem className="cursor-pointer">
             <Link href="/admin/dashboard">Dashboard</Link>
